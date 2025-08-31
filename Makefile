@@ -16,6 +16,7 @@ build-goose:
 	mkdir -p bin
 	go get github.com/pressly/goose/v3/cmd/goose
 	go build -o ./bin/goose github.com/pressly/goose/v3/cmd/goose
+	make tidy
 	echo "[GOOSE] Build completed"
 
 # Define the target: goose-migrate
@@ -36,6 +37,7 @@ build-sqlc:
 	mkdir -p bin
 	go get github.com/sqlc-dev/sqlc/cmd/sqlc
 	go build -o ./bin/sqlc github.com/sqlc-dev/sqlc/cmd/sqlc
+	make tidy
 	echo "[SQLC] Build completed"
 
 # Define the target: sqlc-generate
