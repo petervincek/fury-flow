@@ -11,7 +11,10 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/petervincek/fury-flow/internal/config"
 	"github.com/petervincek/fury-flow/internal/db"
+	"github.com/petervincek/fury-flow/internal/logging"
 )
+
+var logger = logging.GetLogger()
 
 func getKanbanBoards() {
 	dbDriver := os.Getenv("DB_DRIVER")
@@ -23,6 +26,7 @@ func getKanbanBoards() {
 		log.Fatal("unable to parse db port", err)
 	}
 	dbName := os.Getenv("DB_NAME")
+	logger.Info("About to connect to PostgreSQL")
 	dbConn, err := sql.Open("pgx", fmt.Sprintf("%s://%s:%s@%s:%d/%s?sslmode=disable", dbDriver, dbUsername, dbPassword, dbHost, dbPort, dbName))
 
 	if err != nil {
