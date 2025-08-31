@@ -10,6 +10,26 @@ build:
 	go build -o $(OUTPUT) .
 	echo "Build completed: $(OUTPUT)"
 
+# Define the target: build-goose (local goose)
+# we want to use it in the context of this project only (no global installation)
+build-goose:
+	mkdir -p bin
+	go get github.com/pressly/goose/v3/cmd/goose
+	go build -o ./bin/goose github.com/pressly/goose/v3/cmd/goose
+	echo "[GOOSE] Build completed"
+
+# Define the target: goose-migrate
+# use that locally installed/build goose application/tool
+# this command expect env variables to be set: GOOSE_
+goose-migrate:
+	./bin/goose up
+
+# Define the target: goose-migrate-reset
+# use that locally installed/build goose application/tool
+# this command expect env variables to be set: GOOSE_
+goose-migrate-reset:
+	./bin/goose reset
+
 # Define the target: run
 run: build
 	$(OUTPUT)
