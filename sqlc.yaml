@@ -1,0 +1,9 @@
+version: "2"
+sql:
+  - engine: "postgresql" # db we want to generate the code for
+    queries: "internal/db/queries/" # source of the raw queries
+    schema: "migrations/" # folder that contains our db schema
+    gen:
+      go:
+        package: "db"
+        out: "internal/db" # output, place of the generated code
