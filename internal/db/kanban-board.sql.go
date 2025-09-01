@@ -7,7 +7,42 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
+
+const createKanbanBoard = `-- name: CreateKanbanBoard :one
+INSERT INTO kanban_boards (board_name, description, created_by) VALUES ($1, $2, $3) RETURNING board_id, board_name, description, created_at, created_by, updated_at, updated_by
+`
+
+type CreateKanbanBoardParams struct {
+	BoardName   string
+	Description sql.NullString
+	CreatedBy   string
+}
+
+func (q *Queries) CreateKanbanBoard(ctx context.Context, arg CreateKanbanBoardParams) (KanbanBoard, error) {
+	row := q.db.QueryRowContext(ctx, createKanbanBoard, arg.BoardName, arg.Description, arg.CreatedBy)
+	var i KanbanBoard
+	err := row.Scan(
+		&i.BoardID,
+		&i.BoardName,
+		&i.Description,
+		&i.CreatedAt,
+		&i.CreatedBy,
+		&i.UpdatedAt,
+		&i.UpdatedBy,
+	)
+	return i, err
+}
+
+const deleteKanbanBoard = `-- name: DeleteKanbanBoard :exec
+DELETE FROM kanban_boards WHERE board_id = $1
+`
+
+func (q *Queries) DeleteKanbanBoard(ctx context.Context, boardID int32) error {
+	_, err := q.db.ExecContext(ctx, deleteKanbanBoard, boardID)
+	return err
+}
 
 const getKanbanBoards = `-- name: GetKanbanBoards :many
 SELECT board_id, board_name, description, created_at, created_by, updated_at, updated_by from kanban_boards
@@ -42,4 +77,27 @@ func (q *Queries) GetKanbanBoards(ctx context.Context) ([]KanbanBoard, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateKanbanBoard = `-- name: UpdateKanbanBoard :exec
+UPDATE kanban_boards SET board_name = $2, description = $3, updated_at = $4, updated_by = $5 WHERE board_id = $1
+`
+
+type UpdateKanbanBoardParams struct {
+	BoardID     int32
+	BoardName   string
+	Description sql.NullString
+	UpdatedAt   sql.NullTime
+	UpdatedBy   sql.NullString
+}
+
+func (q *Queries) UpdateKanbanBoard(ctx context.Context, arg UpdateKanbanBoardParams) error {
+	_, err := q.db.ExecContext(ctx, updateKanbanBoard,
+		arg.BoardID,
+		arg.BoardName,
+		arg.Description,
+		arg.UpdatedAt,
+		arg.UpdatedBy,
+	)
+	return err
 }
