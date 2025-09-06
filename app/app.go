@@ -11,6 +11,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/petervincek/fury-flow/internal/logging"
 	"github.com/petervincek/fury-flow/internal/utils/retry"
 )
 
@@ -37,6 +38,7 @@ const (
 var (
 	Retry                     = retry.Default()
 	ErrorInvalidListenerState = errors.New("invalid state of listener, listener is nil")
+	logger                    = logging.GetLogger()
 )
 
 // FuryFlow represents the main application structure, encapsulating the Fiber web server instance,
@@ -58,6 +60,7 @@ func NewApp() *FuryFlow {
 // It configures the application's routes and starts listening for incoming requests on the specified port.
 // Returns an error if any step in the initialization fails.
 func (ff *FuryFlow) StartApp() error {
+	logger.Info("Starting the FuryFlow application ...")
 	// create a listener
 	var err error
 	ff.listener, err = net.Listen("tcp", fmt.Sprintf(":%s", os.Getenv("SERVER_PORT")))
@@ -88,6 +91,7 @@ func (ff *FuryFlow) StartApp() error {
 //
 //	error - an error if the shutdown fails, otherwise nil.
 func (ff *FuryFlow) ShutdownApp(timeout time.Duration) error {
+	logger.Info("Gracefully shutting down the FuryFlow application ...")
 	defer ff.pool.Close()
 	return ff.app.ShutdownWithTimeout(timeout)
 }

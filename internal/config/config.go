@@ -7,8 +7,8 @@ import (
 )
 
 func LoadEnvVariables(filename string) {
-	err := godotenv.Overload(filename)
+	err := godotenv.Load(filename)
 	if err != nil {
-		log.Fatalf("Error while loading env file: %s", filename)
+		log.Fatalf("Error while loading env file: %s, %v", filename, err)
 	}
 }
