@@ -2,7 +2,9 @@ package testdata
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 )
@@ -111,7 +113,7 @@ func MakeDeleteRequest[RES_E any](url string) (ResponseResult[RES_E], error) {
 	defer resp.Body.Close()
 
 	var responseEntity RES_E
-	if err := json.NewDecoder(resp.Body).Decode(&responseEntity); err != nil && err.Error() != "EOF" {
+	if err := json.NewDecoder(resp.Body).Decode(&responseEntity); err != nil && !errors.Is(err, io.EOF) {
 		return ResponseResult[RES_E]{}, fmt.Errorf(FAILED_TO_DECODE_RESPONSE, err)
 	}
 
@@ -157,7 +159,7 @@ func MakePutRequest[REQ_E any, RES_E any](url string, requestEntity REQ_E) (Resp
 	defer resp.Body.Close()
 
 	var responseEntity RES_E
-	if err := json.NewDecoder(resp.Body).Decode(&responseEntity); err != nil && err.Error() != "EOF" {
+	if err := json.NewDecoder(resp.Body).Decode(&responseEntity); err != nil && !errors.Is(err, io.EOF) {
 		return ResponseResult[RES_E]{}, fmt.Errorf(FAILED_TO_DECODE_RESPONSE, err)
 	}
 

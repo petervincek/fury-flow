@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/petervincek/fury-flow/internal/api/common"
@@ -17,10 +17,11 @@ import (
 )
 
 const (
-	INTERNAL_SERVER_ERROR        = "internal server error"
-	ERROR_PARSING_BOARD_ID_MSG   = "Error while parsing boardId, err: %v"
-	UNABLE_TO_PARSE_BOARD_ID_MSG = "unable to parse boardId: %d"
-	BOARD_ID_PARAM               = "boardId"
+	INTERNAL_SERVER_ERROR             = "internal server error"
+	ERROR_PARSING_BOARD_ID_MSG        = "Error while parsing boardId, err: %v"
+	UNABLE_TO_PARSE_BOARD_ID_MSG      = "unable to parse boardId: %v"
+	BOARD_ID_PARAM                    = "boardId"
+	KANBAN_BOARD_VALIDATION_ERROR_MSG = "Kanban board validation error"
 )
 
 var logger = logging.GetLogger()
@@ -94,13 +95,13 @@ func (bh *BoardHandler) CreateBoard(c *fiber.Ctx) error {
 		errs, ok := err.(validator.ValidationErrors)
 		if !ok {
 			logger.Error(fmt.Sprintf("Unexpected validation error type, err: %v", err), zap.String("type", fmt.Sprintf("%T", err)))
-			return c.Status(fiber.StatusBadRequest).JSON(common.NewErrorMsg("Kanban board validation error", []string{"invalid input"}))
+			return c.Status(fiber.StatusBadRequest).JSON(common.NewErrorMsg(KANBAN_BOARD_VALIDATION_ERROR_MSG, []string{"invalid input"}))
 		}
 		errMsgs := make([]string, len(errs))
 		for idx, validationErr := range errs {
 			errMsgs[idx] = fmt.Sprintf("Field '%s' failed on the '%s' tag", validationErr.Field(), validationErr.Tag())
 		}
-		return c.Status(fiber.StatusBadRequest).JSON(common.NewErrorMsg("Kanban board validation error", errMsgs))
+		return c.Status(fiber.StatusBadRequest).JSON(common.NewErrorMsg(KANBAN_BOARD_VALIDATION_ERROR_MSG, errMsgs))
 	}
 	// create Kanban board in the system
 	boardToCreate := db.CreateKanbanBoardParams{
@@ -139,13 +140,13 @@ func (bh *BoardHandler) UpdateBoardById(c *fiber.Ctx) error {
 		errs, ok := err.(validator.ValidationErrors)
 		if !ok {
 			logger.Error(fmt.Sprintf("Unexpected validation error type, err: %v", err), zap.String("type", fmt.Sprintf("%T", err)))
-			return c.Status(fiber.StatusBadRequest).JSON(common.NewErrorMsg("Kanban board validation error", []string{"invalid input"}))
+			return c.Status(fiber.StatusBadRequest).JSON(common.NewErrorMsg(KANBAN_BOARD_VALIDATION_ERROR_MSG, []string{"invalid input"}))
 		}
 		errMsgs := make([]string, len(errs))
 		for idx, validationErr := range errs {
 			errMsgs[idx] = fmt.Sprintf("Field '%s' failed on the '%s' tag", validationErr.Field(), validationErr.Tag())
 		}
-		return c.Status(fiber.StatusBadRequest).JSON(common.NewErrorMsg("Kanban board validation error", errMsgs))
+		return c.Status(fiber.StatusBadRequest).JSON(common.NewErrorMsg(KANBAN_BOARD_VALIDATION_ERROR_MSG, errMsgs))
 	}
 	boardToUpdate := db.UpdateKanbanBoardParams{
 		BoardID:     int32(boardId),
