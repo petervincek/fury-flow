@@ -7,3 +7,4 @@ sql:
       go:
         package: "db"
         out: "internal/db" # output, place of the generated code
+        sql_package: "pgx/v5" # important if we want to use pgxpool

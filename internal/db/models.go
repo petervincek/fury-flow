@@ -5,18 +5,17 @@
 package db
 
 import (
-	"database/sql"
-	"time"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type CardAttachment struct {
 	AttachmentID   int32
 	CardID         int32
 	Filename       string
-	FileType       sql.NullString
-	FileSizeBytes  sql.NullInt64
+	FileType       pgtype.Text
+	FileSizeBytes  pgtype.Int8
 	AttachmentData []byte
-	UploadedAt     sql.NullTime
+	UploadedAt     pgtype.Timestamptz
 	UploadedBy     string
 }
 
@@ -25,7 +24,7 @@ type CardComment struct {
 	CardID      int32
 	CommentText string
 	CommentBy   string
-	CreatedAt   sql.NullTime
+	CreatedAt   pgtype.Timestamptz
 }
 
 type CardDependency struct {
@@ -36,29 +35,29 @@ type CardDependency struct {
 type KanbanBoard struct {
 	BoardID     int32
 	BoardName   string
-	Description sql.NullString
-	CreatedAt   time.Time
+	Description pgtype.Text
+	CreatedAt   pgtype.Timestamptz
 	CreatedBy   string
-	UpdatedAt   sql.NullTime
-	UpdatedBy   sql.NullString
+	UpdatedAt   pgtype.Timestamptz
+	UpdatedBy   pgtype.Text
 }
 
 type KanbanCard struct {
 	CardID             int32
 	BoardID            int32
 	Title              string
-	Description        sql.NullString
+	Description        pgtype.Text
 	Status             string
-	Assignee           sql.NullString
-	StoryPoints        sql.NullInt16
-	AcceptanceCriteria sql.NullString
-	TimeSpentHours     sql.NullString
-	CreatedAt          time.Time
+	Assignee           pgtype.Text
+	StoryPoints        pgtype.Int2
+	AcceptanceCriteria pgtype.Text
+	TimeSpentHours     pgtype.Numeric
+	CreatedAt          pgtype.Timestamptz
 	CreatedBy          string
-	UpdatedAt          sql.NullTime
-	UpdatedBy          sql.NullString
-	Priority           sql.NullString
-	Type               sql.NullString
-	IsBlocked          sql.NullBool
-	BlockedReason      sql.NullString
+	UpdatedAt          pgtype.Timestamptz
+	UpdatedBy          pgtype.Text
+	Priority           pgtype.Text
+	Type               pgtype.Text
+	IsBlocked          pgtype.Bool
+	BlockedReason      pgtype.Text
 }

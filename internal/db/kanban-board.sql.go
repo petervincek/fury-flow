@@ -7,7 +7,9 @@ package db
 
 import (
 	"context"
-	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createKanbanBoard = `-- name: CreateKanbanBoard :one
@@ -16,12 +18,12 @@ INSERT INTO kanban_boards (board_name, description, created_by) VALUES ($1, $2, 
 
 type CreateKanbanBoardParams struct {
 	BoardName   string
-	Description sql.NullString
+	Description pgtype.Text
 	CreatedBy   string
 }
 
 func (q *Queries) CreateKanbanBoard(ctx context.Context, arg CreateKanbanBoardParams) (KanbanBoard, error) {
-	row := q.db.QueryRowContext(ctx, createKanbanBoard, arg.BoardName, arg.Description, arg.CreatedBy)
+	row := q.db.QueryRow(ctx, createKanbanBoard, arg.BoardName, arg.Description, arg.CreatedBy)
 	var i KanbanBoard
 	err := row.Scan(
 		&i.BoardID,
@@ -35,13 +37,41 @@ func (q *Queries) CreateKanbanBoard(ctx context.Context, arg CreateKanbanBoardPa
 	return i, err
 }
 
+const deleteAll = `-- name: DeleteAll :exec
+DELETE FROM kanban_boards
+`
+
+func (q *Queries) DeleteAll(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, deleteAll)
+	return err
+}
+
 const deleteKanbanBoard = `-- name: DeleteKanbanBoard :exec
 DELETE FROM kanban_boards WHERE board_id = $1
 `
 
 func (q *Queries) DeleteKanbanBoard(ctx context.Context, boardID int32) error {
-	_, err := q.db.ExecContext(ctx, deleteKanbanBoard, boardID)
+	_, err := q.db.Exec(ctx, deleteKanbanBoard, boardID)
 	return err
+}
+
+const getKanbanBoardById = `-- name: GetKanbanBoardById :one
+SELECT board_id, board_name, description, created_at, created_by, updated_at, updated_by from kanban_boards WHERE board_id = $1
+`
+
+func (q *Queries) GetKanbanBoardById(ctx context.Context, boardID int32) (KanbanBoard, error) {
+	row := q.db.QueryRow(ctx, getKanbanBoardById, boardID)
+	var i KanbanBoard
+	err := row.Scan(
+		&i.BoardID,
+		&i.BoardName,
+		&i.Description,
+		&i.CreatedAt,
+		&i.CreatedBy,
+		&i.UpdatedAt,
+		&i.UpdatedBy,
+	)
+	return i, err
 }
 
 const getKanbanBoards = `-- name: GetKanbanBoards :many
@@ -49,7 +79,7 @@ SELECT board_id, board_name, description, created_at, created_by, updated_at, up
 `
 
 func (q *Queries) GetKanbanBoards(ctx context.Context) ([]KanbanBoard, error) {
-	rows, err := q.db.QueryContext(ctx, getKanbanBoards)
+	rows, err := q.db.Query(ctx, getKanbanBoards)
 	if err != nil {
 		return nil, err
 	}
@@ -70,34 +100,30 @@ func (q *Queries) GetKanbanBoards(ctx context.Context) ([]KanbanBoard, error) {
 		}
 		items = append(items, i)
 	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 	return items, nil
 }
 
-const updateKanbanBoard = `-- name: UpdateKanbanBoard :exec
+const updateKanbanBoard = `-- name: UpdateKanbanBoard :execresult
 UPDATE kanban_boards SET board_name = $2, description = $3, updated_at = $4, updated_by = $5 WHERE board_id = $1
 `
 
 type UpdateKanbanBoardParams struct {
 	BoardID     int32
 	BoardName   string
-	Description sql.NullString
-	UpdatedAt   sql.NullTime
-	UpdatedBy   sql.NullString
+	Description pgtype.Text
+	UpdatedAt   pgtype.Timestamptz
+	UpdatedBy   pgtype.Text
 }
 
-func (q *Queries) UpdateKanbanBoard(ctx context.Context, arg UpdateKanbanBoardParams) error {
-	_, err := q.db.ExecContext(ctx, updateKanbanBoard,
+func (q *Queries) UpdateKanbanBoard(ctx context.Context, arg UpdateKanbanBoardParams) (pgconn.CommandTag, error) {
+	return q.db.Exec(ctx, updateKanbanBoard,
 		arg.BoardID,
 		arg.BoardName,
 		arg.Description,
 		arg.UpdatedAt,
 		arg.UpdatedBy,
 	)
-	return err
 }
