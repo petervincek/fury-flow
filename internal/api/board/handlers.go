@@ -91,7 +91,11 @@ func (bh *BoardHandler) CreateBoard(c *fiber.Ctx) error {
 	}
 	// validate the input from the request
 	if err := validate.Struct(board); err != nil {
-		errs := err.(validator.ValidationErrors)
+		errs, ok := err.(validator.ValidationErrors)
+		if !ok {
+			logger.Error(fmt.Sprintf("Unexpected validation error type, err: %v", err), zap.String("type", fmt.Sprintf("%T", err)))
+			return c.Status(fiber.StatusBadRequest).JSON(common.NewErrorMsg("Kanban board validation error", []string{"invalid input"}))
+		}
 		errMsgs := make([]string, len(errs))
 		for idx, validationErr := range errs {
 			errMsgs[idx] = fmt.Sprintf("Field '%s' failed on the '%s' tag", validationErr.Field(), validationErr.Tag())
@@ -129,6 +133,19 @@ func (bh *BoardHandler) UpdateBoardById(c *fiber.Ctx) error {
 	if err := c.BodyParser(board); err != nil {
 		logger.Error(fmt.Sprintf("Error while parsing board entity, err: %v", err), zap.String("type", fmt.Sprintf("%T", err)))
 		return c.Status(fiber.StatusBadRequest).JSON(common.NewErrorMsg("unable to parse board entity", nil))
+	}
+	// validate the input from the request
+	if err := validate.Struct(board); err != nil {
+		errs, ok := err.(validator.ValidationErrors)
+		if !ok {
+			logger.Error(fmt.Sprintf("Unexpected validation error type, err: %v", err), zap.String("type", fmt.Sprintf("%T", err)))
+			return c.Status(fiber.StatusBadRequest).JSON(common.NewErrorMsg("Kanban board validation error", []string{"invalid input"}))
+		}
+		errMsgs := make([]string, len(errs))
+		for idx, validationErr := range errs {
+			errMsgs[idx] = fmt.Sprintf("Field '%s' failed on the '%s' tag", validationErr.Field(), validationErr.Tag())
+		}
+		return c.Status(fiber.StatusBadRequest).JSON(common.NewErrorMsg("Kanban board validation error", errMsgs))
 	}
 	boardToUpdate := db.UpdateKanbanBoardParams{
 		BoardID:     int32(boardId),
