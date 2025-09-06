@@ -19,7 +19,7 @@ jobs:
         with:
           go-version: '1.24'
       - name: Build Local Goose # this is needed for functional tests and correct state of PostgreSQL
-        run: make build-Goose
+        run: make build-goose
       - name: Build Local SQLC # not needed for now
         run: make build-sqlc
       - name: Install dependencies
