@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/petervincek/fury-flow/internal/config"
+	"github.com/petervincek/fury-flow/internal/utils/env"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -19,8 +19,6 @@ var (
 // GetLogger returns a singleton zap.Logger instance
 func GetLogger() *zap.Logger {
 	onceLogger.Do(func() {
-		config.LoadEnvVariables(".env")
-
 		zapCores := []zapcore.Core{}
 		fileZapCore, ok := tryToCreateFileZapCore()
 		fmt.Printf("FileZapCore created: %t\n", ok)
@@ -40,7 +38,7 @@ func GetLogger() *zap.Logger {
 // Supported log levels are: "debug", "info", "warn", "error", and "fatal".
 // If the environment variable is not set or contains an invalid value, it defaults to zapcore.DebugLevel and returns an error.
 func getLogLevel() (zapcore.Level, error) {
-	level := os.Getenv("LOG_LEVEL")
+	level := env.GetenvOrDefault("LOG_LEVEL", "debug")
 	switch level {
 	case "debug":
 		return zapcore.DebugLevel, nil
