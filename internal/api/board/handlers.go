@@ -153,7 +153,7 @@ func (bh *BoardHandler) UpdateBoardById(c *fiber.Ctx) error {
 		BoardName:   board.BoardName,
 		Description: pgtype.Text{String: board.Description, Valid: true},
 		UpdatedAt:   pgtype.Timestamptz{Time: time.Now(), Valid: true},
-		UpdatedBy:   pgtype.Text{String: board.AuditableFields.UpdatedBy, Valid: true},
+		UpdatedBy:   pgtype.Text{String: board.UpdatedBy, Valid: true},
 	}
 	err = bh.kbs.UpdateKanbanBoard(c.Context(), boardToUpdate)
 	if err != nil {
@@ -163,7 +163,7 @@ func (bh *BoardHandler) UpdateBoardById(c *fiber.Ctx) error {
 		logger.Error(fmt.Sprintf("Error while updating board, err: %v", err), zap.String("type", fmt.Sprintf("%T", err)))
 		return c.Status(fiber.StatusInternalServerError).JSON(common.NewErrorMsg(INTERNAL_SERVER_ERROR, nil))
 	}
-	return c.Status(fiber.StatusOK).JSON(boardToUpdate)
+	return c.Status(fiber.StatusOK).JSON(struct{}{})
 }
 
 // DeleteBoardById handles the HTTP request to delete a board by its ID.
