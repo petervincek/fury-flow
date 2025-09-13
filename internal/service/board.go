@@ -79,3 +79,19 @@ func (kbs *KanbanBoardService) UpdateKanbanBoard(ctx context.Context, board db.U
 func (kbs *KanbanBoardService) DeleteKanbanBoard(ctx context.Context, boardId int32) error {
 	return kbs.q.DeleteKanbanBoard(ctx, boardId)
 }
+
+// KanbanBoardExists checks if a Kanban board with the specified boardId exists.
+// It returns true if the board exists, false otherwise, along with any error encountered during the check.
+//
+// Parameters:
+//
+//	ctx     - The context for controlling cancellation and deadlines.
+//	boardId - The unique identifier of the Kanban board to check.
+//
+// Returns:
+//
+//	bool  - True if the Kanban board exists, false otherwise.
+//	error - An error if the existence check fails.
+func (kbs *KanbanBoardService) KanbanBoardExists(ctx context.Context, boardId int32) (bool, error) {
+	return kbs.q.KanbanBoardExists(ctx, boardId)
+}

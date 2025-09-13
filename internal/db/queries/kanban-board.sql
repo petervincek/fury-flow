@@ -15,3 +15,6 @@ DELETE FROM kanban_boards WHERE board_id = $1;
 
 -- name: DeleteAll :exec
 DELETE FROM kanban_boards;
+
+-- name: KanbanBoardExists :one
+SELECT EXISTS(SELECT 1 FROM kanban_boards WHERE board_id = $1) AS exists;
