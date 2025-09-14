@@ -72,6 +72,9 @@ func (td *TestData) UpdateKanbanCard(boardId int, cardId int, updatedCard card.C
 	return MakePutRequest[card.Card, struct{}](fmt.Sprintf(PUT_KANBAN_CARD_URL_TEMPLATE, td.GetAppUrl(), boardId, cardId), updatedCard)
 }
 
+// DeleteKanbanCard deletes a Kanban card identified by cardId from the specified boardId.
+// It sends a DELETE request to the application's Kanban card endpoint.
+// Returns a ResponseResult containing any response data and an error if the request fails.
 func (td *TestData) DeleteKanbanCard(boardId int, cardId int) (ResponseResult[any], error) {
 	return MakeDeleteRequest[any](fmt.Sprintf(DELETE_KANBAN_CARD_URL_TEMPLATE, td.GetAppUrl(), boardId, cardId))
 }
