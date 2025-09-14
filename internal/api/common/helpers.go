@@ -13,9 +13,11 @@ const (
 	INTERNAL_SERVER_ERROR                = "internal server error"
 	BOARD_ID_PARAM                       = "boardId"
 	CARD_ID_PARAM                        = "cardId"
+	COMMENT_ID_PARAM                     = "commentId"
 	CARD_DEPENDENCY_ID_PARAM             = "cardDependencyId"
 	PARSING_BOARD_ID_ERROR_MSG           = "error parsing board id value"
 	PARSING_CARD_ID_ERROR_MSG            = "error parsing card id value"
+	PARSING_COMMENT_ID_ERROR_MSG         = "error parsing comment id value"
 	EXISTENCE_OF_KANBAN_BOARD_ERROR_MSG  = "error while checking existence of kanban board"
 	EXISTENCE_OF_KANBAN_CARD_ERROR_MSG   = "error while checking existence of kanban card"
 	BOARD_DOES_NOT_EXIST_ERROR_MSG       = "board does not exist"
@@ -24,6 +26,7 @@ const (
 	CARD_WITH_ID_DOES_NOT_EXIST_TEMPATE  = "card with id: %d does not exist"
 	UNABLE_TO_PARSE_BOARD_ID_ERROR_MSG   = "unable to parse board id"
 	UNABLE_TO_PARSE_CARD_ID_ERROR_MSG    = "unable to parse card id"
+	UNABLE_TO_PARSE_COMMENT_ID_ERROR_MSG = "unable to parse comment id"
 )
 
 var logger = logging.GetLogger()
@@ -52,6 +55,20 @@ func ParseCardId(ctx *fiber.Ctx) monad.Result[int] {
 		return monad.NewResultError[int](&e)
 	}
 	return monad.NewResult(&cardId)
+}
+
+// ParseCommentId extracts and parses the comment ID parameter from the Fiber context.
+// It returns a monad.Result containing the parsed integer ID on success, or an error result
+// if the parameter is missing or cannot be parsed. In case of error, it logs the issue and
+// responds with a Bad Request status and a JSON error message.
+func ParseCommentId(ctx *fiber.Ctx) monad.Result[int] {
+	commentId, err := ctx.ParamsInt(COMMENT_ID_PARAM)
+	if err != nil {
+		logger.Error(PARSING_COMMENT_ID_ERROR_MSG, zap.Error(err))
+		e := ctx.Status(fiber.StatusBadRequest).JSON(NewErrorMsg(UNABLE_TO_PARSE_COMMENT_ID_ERROR_MSG, nil))
+		return monad.NewResultError[int](&e)
+	}
+	return monad.NewResult(&commentId)
 }
 
 // CheckAndHandleExistenceOfBoard checks if a board with the given boardId exists using the provided exists function.
