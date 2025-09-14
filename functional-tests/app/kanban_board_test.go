@@ -237,7 +237,7 @@ func TestUpdateExistingKanbanBoard(t *testing.T) {
 	}
 
 	// exercise: update the board by ID
-	updateResp, err := testdata.MakePutRequest[board.Board, board.Board](
+	updateResp, err := testdata.MakePutRequest[board.Board, struct{}](
 		fmt.Sprintf(APP_URL_WITH_CONTEXT_BOARD_ID_TEMPLATE, TEST_APP_SERVER_PORT, testdata.BOARDS_URL_CONTEXT, boardId), updatedBoard)
 	assert.NoError(t, err, "expecting no error while updating kanban board")
 	assert.Equal(t, 200, updateResp.StatusCode(), EXPECTING_STATUS_CODE_200_MSG)
