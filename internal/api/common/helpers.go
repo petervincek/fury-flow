@@ -17,6 +17,7 @@ const (
 	PARSING_BOARD_ID_ERROR_MSG           = "error parsing board id value"
 	PARSING_CARD_ID_ERROR_MSG            = "error parsing card id value"
 	EXISTENCE_OF_KANBAN_BOARD_ERROR_MSG  = "error while checking existence of kanban board"
+	EXISTENCE_OF_KANBAN_CARD_ERROR_MSG   = "error while checking existence of kanban card"
 	BOARD_DOES_NOT_EXIST_ERROR_MSG       = "board does not exist"
 	BOARD_WITH_ID_DOES_NOT_EXIST_TEMPATE = "board with id: %d does not exist"
 	CARD_DOES_NOT_EXIST_ERROR_MSG        = "card does not exist"
@@ -94,7 +95,7 @@ func CheckAndHandleExistenceOfBoard(ctx *fiber.Ctx, boardId int, exists func() (
 func CheckAndHandleExistenceOfCard(ctx *fiber.Ctx, boardId int, cardId int, exists func() (bool, error)) monad.Result[struct{}] {
 	cardExists, err := exists()
 	if err != nil {
-		logger.Error(EXISTENCE_OF_KANBAN_BOARD_ERROR_MSG, zap.Error(err),
+		logger.Error(EXISTENCE_OF_KANBAN_CARD_ERROR_MSG, zap.Error(err),
 			zap.Int(BOARD_ID_PARAM, boardId), zap.Int(CARD_ID_PARAM, cardId))
 		e := ctx.Status(fiber.StatusInternalServerError).JSON(NewErrorMsg(INTERNAL_SERVER_ERROR, nil))
 		return monad.NewResultError[struct{}](&e)

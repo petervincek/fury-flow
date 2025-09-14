@@ -17,7 +17,7 @@ CREATE TABLE kanban_cards (
 
     -- Additional attributes for more complex systems
     assignee VARCHAR(100),
-    story_points SMALLINT CHECK (story_points > 0),
+    story_points SMALLINT CHECK (story_points >= 0),
     acceptance_criteria TEXT, -- This field is intended to store acceptance criteria, often formatted as a list using Markdown.
     time_spent_hours NUMERIC(10, 2) DEFAULT 0.0,
 

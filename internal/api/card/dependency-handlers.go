@@ -87,6 +87,10 @@ func (ch *CardHandler) CreateCardDependencies(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(common.NewErrorMsg("unable to parse dependency card ids", nil))
 	}
 
+	if len(dependencyCardIds) == 0 {
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.NewErrorMsg("at least one dependency card ID must be provided", nil))
+	}
+
 	// check the existence of kanban board
 	checkResult := common.CheckAndHandleExistenceOfBoard(ctx, boardId, func() (bool, error) {
 		return ch.kbs.KanbanBoardExists(ctx.Context(), int32(boardId))

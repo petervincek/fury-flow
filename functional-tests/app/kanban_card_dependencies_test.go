@@ -359,6 +359,47 @@ func TestTryToCreateKanbanCardDependencyForDepedencyCardsThatDoesNotExists(t *te
 	assert.Equal(t, common.NewErrorMsg("internal server error", nil), *depResp.Entity())
 }
 
+func TestTryToCreateKanbanCardDependencyWithEmptyListOfDependencyIds(t *testing.T) {
+	setupTest(t)
+
+	// Create a board
+	kanbanBoard, err := board.NewBuilder().
+		SetBoardName("Empty Dependency List Board").
+		SetDescription("Board for empty dependency list test").
+		SetCreatedBy("Peter").
+		Build()
+	assert.NoError(t, err)
+	boardResp, err := TestDataCreator.CreateKanbanBoard(kanbanBoard)
+	assert.NoError(t, err)
+	boardId := boardResp.Entity().BoardId
+
+	// Create a card
+	kanbanCard, err := card.NewBuilder().
+		SetBoardId(boardId).
+		SetTitle("Main Card - no dependencies").
+		SetDescription("desc for Main Card with no dependencies").
+		SetStatus(card.StatusTodo).
+		SetAcceptanceCriteria("criteria for Main Card with no dependencies").
+		SetType(card.TypeFeature).
+		SetPriority(card.PriorityMedium).
+		SetStoryPoints(2).
+		SetCreatedBy("Peter").
+		Build()
+	assert.NoError(t, err)
+	cardResp, err := TestDataCreator.CreateKanbanCard(boardId, kanbanCard)
+	assert.NoError(t, err)
+	assert.Equal(t, 201, cardResp.StatusCode())
+	mainCardId := cardResp.Entity().CardId
+
+	// Try to create dependencies with an empty list
+	dependencyURL := fmt.Sprintf(APP_CARD_DEPENDENCY_URL_CONTEXT_TEMPLATE, TestDataCreator.GetAppUrl(), boardId, mainCardId)
+	emptyDepIds := []int{}
+	depResp, err := testdata.MakePostRequest[[]int, common.ErrorMsg](dependencyURL, emptyDepIds)
+	assert.NoError(t, err)
+	assert.Equal(t, 400, depResp.StatusCode())
+	assert.Equal(t, common.NewErrorMsg("at least one dependency card ID must be provided", nil), *depResp.Entity())
+}
+
 func TestTryToDeleteCardDependenciesForInvalidBoardId(t *testing.T) {
 	cardId := 1
 	depCardId := 2
