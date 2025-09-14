@@ -28,18 +28,23 @@ var validate = validator.New()
 // It interacts with KanbanBoardService, KanbanCardService, and KanbanCommentService to perform
 // operations related to boards, cards, and comments respectively.
 type CommentHandler struct {
-	boardService   *service.KanbanBoardService
-	cardService    *service.KanbanCardService
-	commentService *service.KanbanCommentService
+	boardService     *service.KanbanBoardService
+	cardService      *service.KanbanCardService
+	commentService   *service.KanbanCommentService
+	integrityService *service.KanbanIntegrityService
 }
 
 // New creates and returns a new instance of CommentHandler with the provided
 // KanbanBoardService, KanbanCardService, and KanbanCommentService dependencies.
-func New(boardService *service.KanbanBoardService, cardService *service.KanbanCardService, commentService *service.KanbanCommentService) *CommentHandler {
+func New(boardService *service.KanbanBoardService,
+	cardService *service.KanbanCardService,
+	commentService *service.KanbanCommentService,
+	integrityService *service.KanbanIntegrityService) *CommentHandler {
 	return &CommentHandler{
-		boardService:   boardService,
-		cardService:    cardService,
-		commentService: commentService,
+		boardService:     boardService,
+		cardService:      cardService,
+		commentService:   commentService,
+		integrityService: integrityService,
 	}
 }
 
@@ -89,6 +94,14 @@ func (ch *CommentHandler) GetCommentsForCard(ctx *fiber.Ctx) error {
 	})
 	if cardExistenceResult.IsLeft() {
 		return cardExistenceResult.Left()
+	}
+
+	// check the integrity between board and card entity
+	integrityResult := common.CheckIntegrityThatCardBelongsToBoard(ctx, boardId, cardId, func() (bool, error) {
+		return ch.integrityService.CardBelongsToBoard(ctx.Context(), boardId, cardId)
+	})
+	if integrityResult.IsLeft() {
+		return integrityResult.Left()
 	}
 
 	// try to get the comments for a given card (card id)
@@ -150,6 +163,14 @@ func (ch *CommentHandler) GetCommentById(ctx *fiber.Ctx) error {
 	})
 	if cardExistenceResult.IsLeft() {
 		return cardExistenceResult.Left()
+	}
+
+	// check the integrity between board and card entity
+	integrityResult := common.CheckIntegrityThatCardBelongsToBoard(ctx, boardId, cardId, func() (bool, error) {
+		return ch.integrityService.CardBelongsToBoard(ctx.Context(), boardId, cardId)
+	})
+	if integrityResult.IsLeft() {
+		return integrityResult.Left()
 	}
 
 	// try to get the comment (by comment id)
@@ -223,6 +244,14 @@ func (ch *CommentHandler) CreateComment(ctx *fiber.Ctx) error {
 		return cardExistenceResult.Left()
 	}
 
+	// check the integrity between board and card entity
+	integrityResult := common.CheckIntegrityThatCardBelongsToBoard(ctx, boardId, cardId, func() (bool, error) {
+		return ch.integrityService.CardBelongsToBoard(ctx.Context(), boardId, cardId)
+	})
+	if integrityResult.IsLeft() {
+		return integrityResult.Left()
+	}
+
 	// try to create card's comment
 	createdComment, err := ch.commentService.CreateKanbanComment(ctx.Context(), db.CreateKanbanCommentParams{
 		CardID:      int32(comment.CardId),
@@ -272,6 +301,14 @@ func (ch *CommentHandler) DeleteCommentsForCard(ctx *fiber.Ctx) error {
 	})
 	if cardExistenceResult.IsLeft() {
 		return cardExistenceResult.Left()
+	}
+
+	// check the integrity between board and card entity
+	integrityResult := common.CheckIntegrityThatCardBelongsToBoard(ctx, boardId, cardId, func() (bool, error) {
+		return ch.integrityService.CardBelongsToBoard(ctx.Context(), boardId, cardId)
+	})
+	if integrityResult.IsLeft() {
+		return integrityResult.Left()
 	}
 
 	// try to delete all comments associated with the given card
@@ -329,6 +366,14 @@ func (ch *CommentHandler) DeleteComment(ctx *fiber.Ctx) error {
 	})
 	if cardExistenceResult.IsLeft() {
 		return cardExistenceResult.Left()
+	}
+
+	// check the integrity between board and card entity
+	integrityResult := common.CheckIntegrityThatCardBelongsToBoard(ctx, boardId, cardId, func() (bool, error) {
+		return ch.integrityService.CardBelongsToBoard(ctx.Context(), boardId, cardId)
+	})
+	if integrityResult.IsLeft() {
+		return integrityResult.Left()
 	}
 
 	// try to get the comments for a given card (card id)

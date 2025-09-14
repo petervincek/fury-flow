@@ -56,6 +56,9 @@ func setupRoutes(ff *FuryFlow) {
 	ff.app.Get("/health", hch.HealthCheck)
 	ff.app.Get("/ready", hch.Ready)
 
+	// create integrity service
+	kis := service.NewKanbanIntegrityService(db.New(ff.pool))
+
 	// define routes to manage the Kanban Boards (the top level namespace for everything else)
 	kbs := service.NewKanbanBoardService(db.New(ff.pool))
 	bh := board.New(kbs)
@@ -85,7 +88,7 @@ func setupRoutes(ff *FuryFlow) {
 
 	// define additional routes to manage comments for individual card in the board
 	commentService := service.NewKanbanCommentService(db.New(ff.pool))
-	commentHandler := comment.New(kbs, kcs, commentService)
+	commentHandler := comment.New(kbs, kcs, commentService, kis)
 	cardCommentsGroup := cardsGroup.Group(fmt.Sprintf("%s/comments", cardIdParamRouteContext))
 	cardCommentsGroup.Get("/", commentHandler.GetCommentsForCard)                      // retrieve all comments for a given card
 	cardCommentsGroup.Get(commentIdParamRouteContext, commentHandler.GetCommentById)   // retrieve comment by id

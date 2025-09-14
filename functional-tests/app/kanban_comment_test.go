@@ -16,6 +16,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	CARD_DOES_NOT_BELONG_TO_BOARD_ERROR_MSG = "card does not belong to board, integrity check failed"
+)
+
 // createBoardAndCard creates a new Kanban board and a card associated with it for testing purposes.
 // It returns the IDs of the created board and card.
 // The function asserts that all creation steps succeed and that the card creation returns a 201 status code.
@@ -57,6 +61,24 @@ func createBoardAndCard(t *testing.T) (int, int) {
 	cardId := cardResp.Entity().CardId
 
 	return boardId, cardId
+}
+
+// TestGetKanbanCommentsForCardNotBelongingToBoard verifies that attempting to retrieve comments for a card
+// using a board ID to which the card does not belong results in a 400 Bad Request error.
+// The test creates two boards and two cards (each card associated with a different board), then tries to
+// fetch comments for the second card using the first board's ID, expecting an integrity check failure.
+func TestGetKanbanCommentsForCardNotBelongingToBoard(t *testing.T) {
+	setupTest(t)
+	// Create two boards and two cards, each card belongs to its own board
+	boardId1, _ := createBoardAndCard(t)
+	_, cardId2 := createBoardAndCard(t)
+
+	// Try to get comments for cardId2 using boardId1 (cardId2 does not belong to boardId1)
+	getResp, err := testdata.MakeGetRequest[common.ErrorMsg](fmt.Sprintf(
+		testdata.GET_KANBAN_BOARD_CARD_COMMENTS_TEMPLATE, TestDataCreator.GetAppUrl(), boardId1, cardId2))
+	assert.NoError(t, err)
+	assert.Equal(t, 400, getResp.StatusCode())
+	assert.Equal(t, common.NewErrorMsg(CARD_DOES_NOT_BELONG_TO_BOARD_ERROR_MSG, nil), *getResp.Entity())
 }
 
 // TestGetKanbanCommentsForInvalidBoardId verifies that requesting kanban comments with an invalid board ID
@@ -164,6 +186,30 @@ func TestGetKanbanCommentsForCardWithMultipleComments(t *testing.T) {
 	for _, text := range commentTexts {
 		assert.True(t, foundTexts[text], "expecting comment with text %s to be present", text)
 	}
+}
+
+// TestTryToCreateKanbanCommentForCardNotBelongingToBoard verifies that attempting to create a kanban comment
+// for a card using a board ID to which the card does not belong results in a 400 Bad Request error.
+// The test creates two boards and two cards (each card associated with a different board), then tries to
+// post a comment to the second card using the first board's ID, expecting an integrity check failure.
+func TestTryToCreateKanbanCommentForCardNotBelongingToBoard(t *testing.T) {
+	setupTest(t)
+	// Create two boards and two cards, each card belongs to its own board
+	boardId1, _ := createBoardAndCard(t)
+	_, cardId2 := createBoardAndCard(t)
+
+	kanbanComment, err := comment.NewBuilder().
+		SetCardId(cardId2).
+		SetCommentText("Should fail due to board/card mismatch").
+		SetCommentBy("Peter").
+		SetCreatedAt(time.Now()).
+		Build()
+	assert.NoError(t, err)
+	resp, err := testdata.MakePostRequest[comment.Comment, common.ErrorMsg](fmt.Sprintf(
+		testdata.POST_KANBAN_COMMENT_URL_TEMPLATE, TestDataCreator.GetAppUrl(), boardId1, cardId2), kanbanComment)
+	assert.NoError(t, err)
+	assert.Equal(t, 400, resp.StatusCode())
+	assert.Equal(t, common.NewErrorMsg(CARD_DOES_NOT_BELONG_TO_BOARD_ERROR_MSG, nil), *resp.Entity())
 }
 
 // TestTryToCreateKanbanCommentWithInvalidBoardId verifies that attempting to create a kanban comment
@@ -334,6 +380,37 @@ func TestGetKanbanCardComments(t *testing.T) {
 	}
 }
 
+// TestTryToGetKanbanCommentByIdForCardNotBelongingToBoard verifies that attempting to retrieve a kanban comment
+// by its ID using a board ID to which the card does not belong results in a 400 Bad Request error.
+// The test creates two boards and two cards (each card associated with a different board), adds a comment to the second card,
+// then tries to fetch the comment using the first board's ID, expecting an integrity check failure.
+func TestTryToGetKanbanCommentByIdForCardNotBelongingToBoard(t *testing.T) {
+	setupTest(t)
+	// Create two boards and two cards, each card belongs to its own board
+	boardId1, _ := createBoardAndCard(t)
+	_, cardId2 := createBoardAndCard(t)
+
+	// Add a comment to cardId2
+	kanbanComment, err := comment.NewBuilder().
+		SetCardId(cardId2).
+		SetCommentText("Should not be accessible from boardId1").
+		SetCommentBy("Peter").
+		SetCreatedAt(time.Now()).
+		Build()
+	assert.NoError(t, err)
+	resp, err := TestDataCreator.CreateKanbanComment(boardId1+1, cardId2, kanbanComment) // boardId1+1 is the second board
+	assert.NoError(t, err)
+	assert.Equal(t, 201, resp.StatusCode())
+	commentId := resp.Entity().CommentId
+
+	// Try to get the comment using boardId1 (cardId2 does not belong to boardId1)
+	getResp, err := testdata.MakeGetRequest[common.ErrorMsg](fmt.Sprintf(
+		testdata.GET_KANBAN_COMMENT_URL_TEMPLATE, TestDataCreator.GetAppUrl(), boardId1, cardId2, commentId))
+	assert.NoError(t, err)
+	assert.Equal(t, 400, getResp.StatusCode())
+	assert.Equal(t, common.NewErrorMsg(CARD_DOES_NOT_BELONG_TO_BOARD_ERROR_MSG, nil), *getResp.Entity())
+}
+
 // TestGetKanbanCardCommentById verifies that a Kanban card comment can be created and retrieved by its ID.
 // The test performs the following steps:
 // 1. Sets up the test environment.
@@ -377,6 +454,37 @@ func TestGetKanbanCardCommentByNonExistingId(t *testing.T) {
 	assert.Equal(t, 404, getResp.StatusCode())
 }
 
+// TestTryToDeleteKanbanCommentByIdForCardNotBelongingToBoard verifies that attempting to delete a kanban comment
+// by its ID using a board ID to which the card does not belong results in a 400 Bad Request error.
+// The test creates two boards and two cards (each card associated with a different board), adds a comment to the second card,
+// then tries to delete the comment using the first board's ID, expecting an integrity check failure.
+func TestTryToDeleteKanbanCommentByIdForCardNotBelongingToBoard(t *testing.T) {
+	setupTest(t)
+	// Create two boards and two cards, each card belongs to its own board
+	boardId1, _ := createBoardAndCard(t)
+	_, cardId2 := createBoardAndCard(t)
+
+	// Add a comment to cardId2
+	kanbanComment, err := comment.NewBuilder().
+		SetCardId(cardId2).
+		SetCommentText("Should not be deletable from boardId1").
+		SetCommentBy("Peter").
+		SetCreatedAt(time.Now()).
+		Build()
+	assert.NoError(t, err)
+	resp, err := TestDataCreator.CreateKanbanComment(boardId1+1, cardId2, kanbanComment) // boardId1+1 is the second board
+	assert.NoError(t, err)
+	assert.Equal(t, 201, resp.StatusCode())
+	commentId := resp.Entity().CommentId
+
+	// Try to delete the comment using boardId1 (cardId2 does not belong to boardId1)
+	deleteResp, err := testdata.MakeDeleteRequest[common.ErrorMsg](fmt.Sprintf(
+		testdata.DELETE_KANBAN_COMMENT_URL_TEMPLATE, TestDataCreator.GetAppUrl(), boardId1, cardId2, commentId))
+	assert.NoError(t, err)
+	assert.Equal(t, 400, deleteResp.StatusCode())
+	assert.Equal(t, common.NewErrorMsg(CARD_DOES_NOT_BELONG_TO_BOARD_ERROR_MSG, nil), *deleteResp.Entity())
+}
+
 // TestDeleteKanbanCardComment verifies that a kanban card comment can be successfully deleted.
 // The test performs the following steps:
 // 1. Sets up the test environment and creates a board and card.
@@ -409,6 +517,38 @@ func TestDeleteKanbanCardComment(t *testing.T) {
 	getResp, err := TestDataCreator.GetKanbanCardComment(boardId, cardId, commentId)
 	assert.NoError(t, err)
 	assert.Equal(t, 404, getResp.StatusCode())
+}
+
+// TestTryToDeleteAllKanbanCommentsForCardNotBelongingToBoard verifies that attempting to delete all comments
+// for a card using a board ID to which the card does not belong results in a 400 Bad Request error.
+// The test creates two boards and two cards (each card associated with a different board), adds comments to the second card,
+// then tries to delete all comments for the second card using the first board's ID, expecting an integrity check failure.
+func TestTryToDeleteAllKanbanCommentsForCardNotBelongingToBoard(t *testing.T) {
+	setupTest(t)
+	// Create two boards and two cards, each card belongs to its own board
+	boardId1, _ := createBoardAndCard(t)
+	_, cardId2 := createBoardAndCard(t)
+
+	// Add comments to cardId2 (which belongs to boardId2)
+	for i := 0; i < 2; i++ {
+		kanbanComment, err := comment.NewBuilder().
+			SetCardId(cardId2).
+			SetCommentText(fmt.Sprintf("Comment %d", i+1)).
+			SetCommentBy("Peter").
+			SetCreatedAt(time.Now()).
+			Build()
+		assert.NoError(t, err)
+		resp, err := TestDataCreator.CreateKanbanComment(boardId1+1, cardId2, kanbanComment) // boardId1+1 is the second board
+		assert.NoError(t, err)
+		assert.Equal(t, 201, resp.StatusCode())
+	}
+
+	// Try to delete all comments for cardId2 using boardId1 (cardId2 does not belong to boardId1)
+	deleteResp, err := testdata.MakeDeleteRequest[common.ErrorMsg](fmt.Sprintf(
+		testdata.DELETE_KANBAN_COMMENTS_URL_TEMPLATE, TestDataCreator.GetAppUrl(), boardId1, cardId2))
+	assert.NoError(t, err)
+	assert.Equal(t, 400, deleteResp.StatusCode())
+	assert.Equal(t, common.NewErrorMsg(CARD_DOES_NOT_BELONG_TO_BOARD_ERROR_MSG, nil), *deleteResp.Entity())
 }
 
 // TestDeleteAllKanbanCardComments verifies that all comments associated with a Kanban card

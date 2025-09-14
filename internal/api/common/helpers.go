@@ -155,3 +155,34 @@ func CheckAndHandleExistenceOfCardDependency(ctx *fiber.Ctx, boardId int, cardId
 	}
 	return monad.NewResult(&struct{}{})
 }
+
+// CheckIntegrityThatCardBelongsToBoard verifies that a card belongs to a specific board by executing the provided integrityCheck function.
+// If the integrity check fails or returns an error, it logs the error and responds with an appropriate HTTP status and error message.
+// Returns a monad.Result containing either an empty struct on success or an error response on failure.
+//
+// Parameters:
+//   - ctx: Fiber context for handling HTTP responses.
+//   - boardId: The ID of the board to check against.
+//   - cardId: The ID of the card to verify.
+//   - integrityCheck: A function that returns a boolean indicating integrity and an error if any.
+//
+// Returns:
+//   - monad.Result[struct{}]: Result containing success or error information.
+func CheckIntegrityThatCardBelongsToBoard(ctx *fiber.Ctx, boardId int, cardId int, integrityCheck func() (bool, error)) monad.Result[struct{}] {
+	// check the integrity between board and card entity
+	ok, err := integrityCheck()
+	if err != nil {
+		logger.Error("error while checking integrity between board and card", zap.Error(err),
+			zap.Int(BOARD_ID_PARAM, boardId), zap.Int(CARD_ID_PARAM, cardId))
+		e := ctx.Status(fiber.StatusInternalServerError).JSON(NewErrorMsg(INTERNAL_SERVER_ERROR, nil))
+		return monad.NewResultError[struct{}](&e)
+	}
+	if !ok {
+		logger.Error("card does not belong to board, integrity check failed", zap.Error(err),
+			zap.Int(BOARD_ID_PARAM, boardId), zap.Int(CARD_ID_PARAM, cardId))
+		e := ctx.Status(fiber.StatusBadRequest).
+			JSON(NewErrorMsg("card does not belong to board, integrity check failed", nil))
+		return monad.NewResultError[struct{}](&e)
+	}
+	return monad.NewResult(&struct{}{})
+}
