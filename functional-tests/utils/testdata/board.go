@@ -21,15 +21,15 @@ func (td *TestData) CreateKanbanBoard(kanbanBoard board.Board) (ResponseResult[b
 // It returns a slice of ResponseResult containing the results for each created board, or an error if any creation fails.
 // If an error occurs during the creation of any board, the function returns the results accumulated so far along with the error.
 func (td *TestData) CreateKanbanBoards(kanbanBoards []board.Board) ([]ResponseResult[board.Board], error) {
-	var results []ResponseResult[board.Board]
-	for _, b := range kanbanBoards {
-		res, err := td.CreateKanbanBoard(b)
+	responseResults := make([]ResponseResult[board.Board], len(kanbanBoards))
+	for idx, kanbanBoard := range kanbanBoards {
+		responseResult, err := td.CreateKanbanBoard(kanbanBoard)
 		if err != nil {
-			return results, err
+			return []ResponseResult[board.Board]{}, err
 		}
-		results = append(results, res)
+		responseResults[idx] = responseResult
 	}
-	return results, nil
+	return responseResults, nil
 }
 
 // GetKanbanBoardById retrieves a Kanban board by its unique identifier.
@@ -60,7 +60,7 @@ func (td *TestData) UpdateKanbanBoardById(id int, updatedBoard board.Board) (Res
 // It constructs the appropriate URL using the application URL and board context,
 // then sends a DELETE request to remove the board.
 // Returns a ResponseResult containing any response data and an error if the request fails.
-func (td *TestData) DeleteKanbanBoardById(id int) (ResponseResult[any], error) {
+func (td *TestData) DeleteKanbBoardById(id int) (ResponseResult[any], error) {
 	url := fmt.Sprintf(APP_URL_TEMPLATE, td.GetAppUrl(), BOARDS_URL_CONTEXT, id)
 	return MakeDeleteRequest[any](url)
 }
