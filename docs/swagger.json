@@ -1,0 +1,1573 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/boards": {
+            "get": {
+                "description": "Retrieves a list of all Kanban boards for the current user/context.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "boards"
+                ],
+                "summary": "Get all Kanban boards",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/board.Board"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new Kanban board with the provided details.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "boards"
+                ],
+                "summary": "Create Kanban Board",
+                "parameters": [
+                    {
+                        "description": "Board entity",
+                        "name": "board",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/board.Board"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created board entity",
+                        "schema": {
+                            "$ref": "#/definitions/board.Board"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input or validation error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/boards/{boardId}": {
+            "get": {
+                "description": "Retrieves a Kanban board by its unique identifier.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "boards"
+                ],
+                "summary": "Get Kanban Board by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Board found",
+                        "schema": {
+                            "$ref": "#/definitions/board.Board"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid board ID",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates the details of a Kanban board specified by its ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "boards"
+                ],
+                "summary": "Update Kanban Board by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Board entity to update",
+                        "name": "board",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/board.Board"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid input or validation error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board not found or not updated",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes the Kanban board specified by the board ID parameter.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "boards"
+                ],
+                "summary": "Delete a Kanban board by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Unable to parse board ID",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/boards/{boardId}/cards": {
+            "get": {
+                "description": "Retrieves all kanban cards associated with the specified board ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Get Kanban Cards for Board",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of Kanban Cards",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/card.Card"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Board ID",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new Kanban card under the specified board. The board must exist.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Create a new Kanban card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Card object",
+                        "name": "card",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/card.Card"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created card",
+                        "schema": {
+                            "$ref": "#/definitions/card.Card"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input or board not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/boards/{boardId}/cards/{cardId}": {
+            "get": {
+                "description": "Retrieves a kanban card by its ID, validating that it belongs to the specified board.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Get Kanban Card by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Kanban card found",
+                        "schema": {
+                            "$ref": "#/definitions/card.Card"
+                        }
+                    },
+                    "400": {
+                        "description": "Card does not belong to board",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Kanban card not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update the details of a Kanban card specified by boardId and cardId.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Update a Kanban card by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Card object to update",
+                        "name": "card",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/card.Card"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid request or card not part of board",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Card not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a kanban card from the specified board.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Delete a kanban card by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid board or card ID",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board or card not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/boards/{boardId}/cards/{cardId}/attachments": {
+            "get": {
+                "description": "Retrieves all attachments associated with a specific card in a board.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attachments"
+                ],
+                "summary": "Get attachments for a card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of attachments",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/attachment.Attachment"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid board or card ID",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board or card not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new attachment for the specified card within a board.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attachments"
+                ],
+                "summary": "Create a new attachment for a card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Attachment object",
+                        "name": "attachment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/attachment.Attachment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created attachment",
+                        "schema": {
+                            "$ref": "#/definitions/attachment.Attachment"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input or entity not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes all attachments associated with the specified card in the given board.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attachments"
+                ],
+                "summary": "Delete all attachments for a card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid board or card ID",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board or card not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/boards/{boardId}/cards/{cardId}/attachments/{attachmentId}": {
+            "get": {
+                "description": "Retrieves a specific attachment for a kanban card by its ID, ensuring board and card integrity.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attachments"
+                ],
+                "summary": "Get Kanban Card Attachment by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Attachment ID",
+                        "name": "attachmentId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Attachment found",
+                        "schema": {
+                            "$ref": "#/definitions/attachment.Attachment"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or integrity error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Attachment not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a specific attachment from a card in a kanban board after validating all relationships and existence.",
+                "tags": [
+                    "attachments"
+                ],
+                "summary": "Delete an attachment from a kanban card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Attachment ID",
+                        "name": "attachmentId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/boards/{boardId}/cards/{cardId}/comments": {
+            "get": {
+                "description": "Retrieves all comments for a given card on a specified board.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Get comments for a card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of comments",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/comment.Comment"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid board or card ID",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board or card not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a comment for the specified card in the specified board.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Create a new comment on a Kanban card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Comment object",
+                        "name": "comment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/comment.Comment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/comment.Comment"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input or entity not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes all comments associated with the specified card in the given board.",
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Delete all comments for a card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid board or card ID",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board or card not found, or card does not belong to board",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/boards/{boardId}/cards/{cardId}/comments/{commentId}": {
+            "get": {
+                "description": "Retrieves a specific comment from a Kanban card by its ID, ensuring board, card, and comment integrity.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Get Kanban Comment by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Comment ID",
+                        "name": "commentId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Comment found",
+                        "schema": {
+                            "$ref": "#/definitions/comment.Comment"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or integrity error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Comment not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a specific comment from a card in a board after validating all entities and their relationships.",
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Delete a comment from a card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Comment ID",
+                        "name": "commentId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Comment deleted successfully"
+                    },
+                    "400": {
+                        "description": "Invalid request or integrity error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board, card, or comment not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/boards/{boardId}/cards/{cardId}/dependencies": {
+            "get": {
+                "description": "Retrieves the dependencies of a specific kanban card within a board.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Get card dependencies",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of card dependencies",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/card.Card"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid board or card ID",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board or card not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates dependencies for a kanban card by specifying dependent card IDs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Create card dependencies",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Array of dependency card IDs",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid input or missing dependency card IDs",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board or card not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes all dependencies for the specified card in the given board.",
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Delete all dependencies of a kanban card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid board or card ID",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board or card not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/boards/{boardId}/cards/{cardId}/dependencies/{cardDependencyId}": {
+            "delete": {
+                "description": "Deletes a dependency from a kanban card by its ID.",
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Delete a card dependency",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card Dependency ID",
+                        "name": "cardDependencyId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/cards": {
+            "get": {
+                "description": "Returns a list of all Kanban cards in the system.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Get all Kanban cards",
+                "responses": {
+                    "200": {
+                        "description": "List of Kanban cards",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/card.Card"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Returns 200 OK if the service is healthy.",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health Check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/health/ready": {
+            "get": {
+                "description": "Checks if the application is ready to serve requests by verifying database connectivity.",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Readiness check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "attachment.Attachment": {
+            "type": "object",
+            "required": [
+                "attachmentData",
+                "fileSizeBytes",
+                "fileType",
+                "filename",
+                "uploadedBy"
+            ],
+            "properties": {
+                "attachmentData": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "attachmentId": {
+                    "type": "integer"
+                },
+                "cardId": {
+                    "description": "should this be at this level just id or the whole card document",
+                    "type": "integer"
+                },
+                "fileSizeBytes": {
+                    "type": "integer"
+                },
+                "fileType": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "filename": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "uploadedAt": {
+                    "type": "string"
+                },
+                "uploadedBy": {
+                    "type": "string",
+                    "minLength": 3
+                }
+            }
+        },
+        "board.Board": {
+            "type": "object",
+            "required": [
+                "boardName",
+                "description"
+            ],
+            "properties": {
+                "boardId": {
+                    "type": "integer"
+                },
+                "boardName": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdBy": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "updatedBy": {
+                    "type": "string"
+                }
+            }
+        },
+        "card.Card": {
+            "type": "object",
+            "required": [
+                "acceptanceCriteria",
+                "description",
+                "status",
+                "storyPoints",
+                "title",
+                "type"
+            ],
+            "properties": {
+                "acceptanceCriteria": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "assignee": {
+                    "type": "string"
+                },
+                "blockedReason": {
+                    "type": "string"
+                },
+                "boardId": {
+                    "description": "should this be at this level just id or the whole board document",
+                    "type": "integer"
+                },
+                "cardId": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdBy": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "isBlocked": {
+                    "type": "boolean"
+                },
+                "priority": {
+                    "$ref": "#/definitions/card.Priority"
+                },
+                "status": {
+                    "minLength": 3,
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/card.Status"
+                        }
+                    ]
+                },
+                "storyPoints": {
+                    "type": "integer"
+                },
+                "timeSpentHours": {
+                    "type": "number"
+                },
+                "title": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "type": {
+                    "minLength": 3,
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/card.Type"
+                        }
+                    ]
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "updatedBy": {
+                    "type": "string"
+                }
+            }
+        },
+        "card.Priority": {
+            "type": "string",
+            "enum": [
+                "High",
+                "Medium",
+                "Low"
+            ],
+            "x-enum-varnames": [
+                "PriorityHigh",
+                "PriorityMedium",
+                "PriorityLow"
+            ]
+        },
+        "card.Status": {
+            "type": "string",
+            "enum": [
+                "To Do",
+                "In Progress",
+                "In Review",
+                "Done"
+            ],
+            "x-enum-varnames": [
+                "StatusTodo",
+                "StatusInProgress",
+                "StatusInReview",
+                "StatusDone"
+            ]
+        },
+        "card.Type": {
+            "type": "string",
+            "enum": [
+                "Bug",
+                "Feature",
+                "Maintenance"
+            ],
+            "x-enum-varnames": [
+                "TypeBug",
+                "TypeFeature",
+                "TypeMaintenance"
+            ]
+        },
+        "comment.Comment": {
+            "type": "object",
+            "required": [
+                "commentBy",
+                "commentText"
+            ],
+            "properties": {
+                "cardId": {
+                    "description": "should this be at this level just id or the whole card document",
+                    "type": "integer"
+                },
+                "commentBy": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "commentId": {
+                    "type": "integer"
+                },
+                "commentText": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "createdAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "common.ErrorMsg": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

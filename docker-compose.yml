@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: furyflow_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: furyflow
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # - ./ddl.sql:/docker-entrypoint-initdb.d/ddl.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U furyuser"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: furyflow_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    ports:
+      - "9090:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  postgres_data: # docker volume inspect postgres_data
+    driver: local
+  pgadmin_data: # docker volume inspect pgadmin_data
+    driver: local
