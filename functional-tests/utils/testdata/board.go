@@ -60,7 +60,7 @@ func (td *TestData) UpdateKanbanBoardById(id int, updatedBoard board.Board) (Res
 // It constructs the appropriate URL using the application URL and board context,
 // then sends a DELETE request to remove the board.
 // Returns a ResponseResult containing any response data and an error if the request fails.
-func (td *TestData) DeleteKanbBoardById(id int) (ResponseResult[any], error) {
+func (td *TestData) DeleteKanbanBoardById(id int) (ResponseResult[any], error) {
 	url := fmt.Sprintf(APP_URL_TEMPLATE, td.GetAppUrl(), BOARDS_URL_CONTEXT, id)
 	return MakeDeleteRequest[any](url)
 }
