@@ -19,7 +19,7 @@ var logger = logging.GetLogger()
 
 func main() {
 	fmt.Printf("Fury flow\n")
-	config.LoadEnvVariables(".env")
+	config.TryLoadEnvVariables()
 	app := app.NewApp()
 
 	// start the application in separate go routine

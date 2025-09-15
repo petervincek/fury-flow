@@ -1,14 +1,23 @@
 package config
 
 import (
-	"log"
+	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/petervincek/fury-flow/internal/logging"
+	"go.uber.org/zap"
 )
 
-func LoadEnvVariables(filename string) {
-	err := godotenv.Load(filename)
+var logger = logging.GetLogger()
+
+func TryLoadEnvVariables() {
+	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error while loading env file: %s, %v", filename, err)
+		// Check if the error is because the .env file does not exist
+		if os.IsNotExist(err) {
+			logger.Warn("No .env file found, skipping loading environment variables.")
+		} else {
+			logger.Fatal("Error while loading default env file", zap.Error(err))
+		}
 	}
 }
