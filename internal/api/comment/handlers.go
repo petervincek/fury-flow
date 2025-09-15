@@ -65,6 +65,18 @@ func New(boardService *service.KanbanBoardService,
 // Returns:
 //   - 200 OK with the list of comments in JSON format if successful.
 //   - 400/404/500 error responses in case of invalid input, not found, or internal errors.
+//
+// @Summary      Get comments for a card
+// @Description  Retrieves all comments for a given card on a specified board.
+// @Tags         comments
+// @Param        boardId   path      int  true  "Board ID"
+// @Param        cardId    path      int  true  "Card ID"
+// @Produce      json
+// @Success      200       {array}   comment.Comment   "List of comments"
+// @Failure      400       {object}  common.ErrorMsg   "Invalid board or card ID"
+// @Failure      404       {object}  common.ErrorMsg   "Board or card not found"
+// @Failure      500       {object}  common.ErrorMsg   "Internal server error"
+// @Router       /boards/{boardId}/cards/{cardId}/comments [get]
 func (ch *CommentHandler) GetCommentsForCard(ctx *fiber.Ctx) error {
 	// try to parse board id
 	boardIdResult := common.ParseBoardId(ctx)
@@ -127,6 +139,19 @@ func (ch *CommentHandler) GetCommentsForCard(ctx *fiber.Ctx) error {
 //   - 400 Bad Request if the comment does not belong to the card.
 //   - 404 Not Found if the comment does not exist.
 //   - 500 Internal Server Error for unexpected errors.
+//
+// @Summary      Get Kanban Comment by ID
+// @Description  Retrieves a specific comment from a Kanban card by its ID, ensuring board, card, and comment integrity.
+// @Tags         comments
+// @Produce      json
+// @Param        boardId   path      int     true  "Board ID"
+// @Param        cardId    path      int     true  "Card ID"
+// @Param        commentId path      int     true  "Comment ID"
+// @Success      200       {object}  comment.Comment   "Comment found"
+// @Failure      400       {object}  common.ErrorMsg   "Invalid request or integrity error"
+// @Failure      404       {object}  common.ErrorMsg   "Comment not found"
+// @Failure      500       {object}  common.ErrorMsg   "Internal server error"
+// @Router       /boards/{boardId}/cards/{cardId}/comments/{commentId} [get]
 func (ch *CommentHandler) GetCommentById(ctx *fiber.Ctx) error {
 	// try to parse board id
 	boardIdResult := common.ParseBoardId(ctx)
@@ -205,6 +230,24 @@ func (ch *CommentHandler) GetCommentById(ctx *fiber.Ctx) error {
 //  7. Returns the created comment as a JSON response with HTTP 201 status.
 //
 // If any step fails, it returns an appropriate error response.
+// CreateComment handles the creation of a new comment on a Kanban card.
+//
+// It parses and validates the board ID, card ID, and comment data from the request,
+// checks the existence and integrity of the board and card entities, and creates the comment.
+// Returns the created comment in the response.
+//
+// @Summary      Create a new comment on a Kanban card
+// @Description  Creates a comment for the specified card in the specified board.
+// @Tags         comments
+// @Accept       json
+// @Produce      json
+// @Param        boardId    path      int     true  "Board ID"
+// @Param        cardId     path      int     true  "Card ID"
+// @Param        comment    body      comment.Comment true  "Comment object"
+// @Success      201        {object}  comment.Comment
+// @Failure      400        {object}  common.ErrorMsg "Invalid input or entity not found"
+// @Failure      500        {object}  common.ErrorMsg "Internal server error"
+// @Router       /boards/{boardId}/cards/{cardId}/comments [post]
 func (ch *CommentHandler) CreateComment(ctx *fiber.Ctx) error {
 	// try to parse board id
 	boardIdResult := common.ParseBoardId(ctx)
@@ -272,6 +315,17 @@ func (ch *CommentHandler) CreateComment(ctx *fiber.Ctx) error {
 // It parses the board and card IDs from the request context, checks for their existence,
 // and then deletes all comments linked to the specified card. Returns appropriate HTTP status codes
 // based on the outcome of each operation.
+//
+// @Summary Delete all comments for a card
+// @Description Deletes all comments associated with the specified card in the given board.
+// @Tags comments
+// @Param boardId path int true "Board ID"
+// @Param cardId path int true "Card ID"
+// @Success 204 "No Content"
+// @Failure 400 {object} common.ErrorMsg "Invalid board or card ID"
+// @Failure 404 {object} common.ErrorMsg "Board or card not found, or card does not belong to board"
+// @Failure 500 {object} common.ErrorMsg "Internal server error"
+// @Router /boards/{boardId}/cards/{cardId}/comments [delete]
 func (ch *CommentHandler) DeleteCommentsForCard(ctx *fiber.Ctx) error {
 	// try to parse board id
 	boardIdResult := common.ParseBoardId(ctx)
@@ -330,6 +384,22 @@ func (ch *CommentHandler) DeleteCommentsForCard(ctx *fiber.Ctx) error {
 //
 // Returns appropriate HTTP status codes and error messages for invalid input,
 // non-existent resources, or internal errors.
+// DeleteComment handles the deletion of a specific comment from a card in a board.
+// It parses and validates the board, card, and comment IDs from the request context,
+// checks the existence and integrity of the board and card, ensures the comment belongs to the card,
+// and deletes the comment if all checks pass.
+//
+//	@Summary		Delete a comment from a card
+//	@Description	Deletes a specific comment from a card in a board after validating all entities and their relationships.
+//	@Tags			comments
+//	@Param			boardId		path	int		true	"Board ID"
+//	@Param			cardId		path	int		true	"Card ID"
+//	@Param			commentId	path	int		true	"Comment ID"
+//	@Success		204			"Comment deleted successfully"
+//	@Failure		400			{object}	common.ErrorMsg	"Invalid request or integrity error"
+//	@Failure		404			{object}	common.ErrorMsg	"Board, card, or comment not found"
+//	@Failure		500			{object}	common.ErrorMsg	"Internal server error"
+//	@Router			/boards/{boardId}/cards/{cardId}/comments/{commentId} [delete]
 func (ch *CommentHandler) DeleteComment(ctx *fiber.Ctx) error {
 	// try to parse board id
 	boardIdResult := common.ParseBoardId(ctx)

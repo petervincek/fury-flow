@@ -482,6 +482,281 @@
                 }
             }
         },
+        "/boards/{boardId}/cards/{cardId}/comments": {
+            "get": {
+                "description": "Retrieves all comments for a given card on a specified board.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Get comments for a card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of comments",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/comment.Comment"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid board or card ID",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board or card not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a comment for the specified card in the specified board.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Create a new comment on a Kanban card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Comment object",
+                        "name": "comment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/comment.Comment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/comment.Comment"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input or entity not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes all comments associated with the specified card in the given board.",
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Delete all comments for a card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid board or card ID",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board or card not found, or card does not belong to board",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/boards/{boardId}/cards/{cardId}/comments/{commentId}": {
+            "get": {
+                "description": "Retrieves a specific comment from a Kanban card by its ID, ensuring board, card, and comment integrity.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Get Kanban Comment by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Comment ID",
+                        "name": "commentId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Comment found",
+                        "schema": {
+                            "$ref": "#/definitions/comment.Comment"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or integrity error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Comment not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a specific comment from a card in a board after validating all entities and their relationships.",
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Delete a comment from a card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Comment ID",
+                        "name": "commentId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Comment deleted successfully"
+                    },
+                    "400": {
+                        "description": "Invalid request or integrity error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board, card, or comment not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
         "/boards/{boardId}/cards/{cardId}/dependencies": {
             "get": {
                 "description": "Retrieves the dependencies of a specific kanban card within a board.",
@@ -931,6 +1206,33 @@
                 "TypeFeature",
                 "TypeMaintenance"
             ]
+        },
+        "comment.Comment": {
+            "type": "object",
+            "required": [
+                "commentBy",
+                "commentText"
+            ],
+            "properties": {
+                "cardId": {
+                    "description": "should this be at this level just id or the whole card document",
+                    "type": "integer"
+                },
+                "commentBy": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "commentId": {
+                    "type": "integer"
+                },
+                "commentText": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "createdAt": {
+                    "type": "string"
+                }
+            }
         },
         "common.ErrorMsg": {
             "type": "object",
