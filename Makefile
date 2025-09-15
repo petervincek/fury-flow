@@ -1,8 +1,10 @@
+# Define the app name
+APP_NAME = fury-flow
 # Define the output for project's binary
-OUTPUT = bin/fury-flow
+OUTPUT = bin/$(APP_NAME)
 
 # Define the app's entry directory (that holds main.go)
-ENTRY_DIR = ./cmd/fury-flow
+ENTRY_DIR = ./cmd/$(APP_NAME)
 
 # Default target
 all: build
@@ -12,6 +14,12 @@ build: swag-generate
 	mkdir -p bin
 	go build -o $(OUTPUT) $(ENTRY_DIR)
 	echo "Build completed: $(OUTPUT)"
+
+# Define the target: linux
+linux:
+	mkdir -p bin
+	GOOS=linux GOARCH=amd64 go build -o $(OUTPUT)-linux $(ENTRY_DIR)
+	echo "Build for Linux completed: $(OUTPUT)-linux"
 
 # Define the target: build-goose (local goose)
 # we want to use it in the context of this project only (no global installation)
