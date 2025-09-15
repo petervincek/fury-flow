@@ -1,13 +1,16 @@
 # Define the output for project's binary
 OUTPUT = bin/fury-flow
 
+# Define the app's entry directory (that holds main.go)
+ENTRY_DIR = ./cmd/fury-flow
+
 # Default target
 all: build
 
 # Define the target: build
 build:
 	mkdir -p bin
-	go build -o $(OUTPUT) ./cmd/fury-flow
+	go build -o $(OUTPUT) $(ENTRY_DIR)
 	echo "Build completed: $(OUTPUT)"
 
 # Define the target: build-goose (local goose)
@@ -43,6 +46,19 @@ build-sqlc:
 # Define the target: sqlc-generate
 sqlc-generate:
 	./bin/sqlc generate
+
+# Define the target: build-swag (local swaggo/swag)
+# we want to use it in the context of this project only (no global installation)
+build-swag:
+	mkdir -p bin
+	go get github.com/swaggo/swag/cmd/swag
+	go build -o ./bin/swag github.com/swaggo/swag/cmd/swag
+	make tidy
+	echo "[SWAG] Build completed"
+
+# Define the target: swag-generate
+swag-generate:
+	./bin/swag init -g $(ENTRY_DIR)/main.go
 
 # Define the target: run
 run: build
