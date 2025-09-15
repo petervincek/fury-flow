@@ -9,6 +9,7 @@ import (
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/petervincek/fury-flow/app"
+	_ "github.com/petervincek/fury-flow/docs"
 	"github.com/petervincek/fury-flow/internal/config"
 	"github.com/petervincek/fury-flow/internal/logging"
 	"go.uber.org/zap"

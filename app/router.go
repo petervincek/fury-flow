@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 
+	"github.com/gofiber/swagger"
 	"github.com/petervincek/fury-flow/internal/api/attachment"
 	"github.com/petervincek/fury-flow/internal/api/board"
 	"github.com/petervincek/fury-flow/internal/api/card"
@@ -60,6 +61,9 @@ func setupRoutes(ff *FuryFlow) {
 	hch := healthcheck.New(ff.pool)
 	ff.app.Get("/health", hch.HealthCheck)
 	ff.app.Get("/ready", hch.Ready)
+
+	// define the route for Swagger UI
+	ff.app.Get("/swagger/*", swagger.HandlerDefault)
 
 	// create integrity service
 	kis := service.NewKanbanIntegrityService(db.New(ff.pool))
