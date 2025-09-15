@@ -8,7 +8,7 @@ ENTRY_DIR = ./cmd/fury-flow
 all: build
 
 # Define the target: build
-build:
+build: swag-generate
 	mkdir -p bin
 	go build -o $(OUTPUT) $(ENTRY_DIR)
 	echo "Build completed: $(OUTPUT)"
