@@ -67,6 +67,18 @@ func New(boardService *service.KanbanBoardService,
 //  5. Returns the attachments as a JSON response.
 //
 // Returns an appropriate error response if any validation or retrieval step fails.
+//
+// @Summary      Get attachments for a card
+// @Description  Retrieves all attachments associated with a specific card in a board.
+// @Tags         attachments
+// @Produce      json
+// @Param        boardId   path      int  true  "Board ID"
+// @Param        cardId    path      int  true  "Card ID"
+// @Success      200  {array}   attachment.Attachment  "List of attachments"
+// @Failure      400  {object}  common.ErrorMsg        "Invalid board or card ID"
+// @Failure      404  {object}  common.ErrorMsg        "Board or card not found"
+// @Failure      500  {object}  common.ErrorMsg        "Internal server error"
+// @Router       /boards/{boardId}/cards/{cardId}/attachments [get]
 func (ah *AttachmentHandler) GetAttachmentsForCard(ctx *fiber.Ctx) error {
 	// try to parse board id
 	boardIdResult := common.ParseBoardId(ctx)
@@ -127,6 +139,19 @@ func (ah *AttachmentHandler) GetAttachmentsForCard(ctx *fiber.Ctx) error {
 //
 // Returns appropriate HTTP error responses for invalid input, non-existent resources,
 // integrity violations, or internal server errors.
+//
+// @Summary      Get Kanban Card Attachment by ID
+// @Description  Retrieves a specific attachment for a kanban card by its ID, ensuring board and card integrity.
+// @Tags         attachments
+// @Produce      json
+// @Param        boardId      path      int     true  "Board ID"
+// @Param        cardId       path      int     true  "Card ID"
+// @Param        attachmentId path      int     true  "Attachment ID"
+// @Success      200  {object}  attachment.Attachment  "Attachment found"
+// @Failure      400  {object}  common.ErrorMsg        "Invalid request or integrity error"
+// @Failure      404  {object}  common.ErrorMsg        "Attachment not found"
+// @Failure      500  {object}  common.ErrorMsg        "Internal server error"
+// @Router       /boards/{boardId}/cards/{cardId}/attachments/{attachmentId} [get]
 func (ah *AttachmentHandler) GetAttachmentById(ctx *fiber.Ctx) error {
 	// try to parse board id
 	boardIdResult := common.ParseBoardId(ctx)
@@ -207,6 +232,19 @@ func (ah *AttachmentHandler) GetAttachmentById(ctx *fiber.Ctx) error {
 //
 // Returns an appropriate error response if any validation or integrity check fails,
 // or if the attachment creation encounters an error.
+//
+// @Summary Create a new attachment for a card
+// @Description Creates a new attachment for the specified card within a board.
+// @Tags attachments
+// @Accept  json
+// @Produce json
+// @Param boardId path int true "Board ID"
+// @Param cardId  path int true "Card ID"
+// @Param attachment body attachment.Attachment true "Attachment object"
+// @Success 201 {object} attachment.Attachment "Created attachment"
+// @Failure 400 {object} common.ErrorMsg       "Invalid input or entity not found"
+// @Failure 500 {object} common.ErrorMsg       "Internal server error"
+// @Router /boards/{boardId}/cards/{cardId}/attachments [post]
 func (ah *AttachmentHandler) CreateAttachment(ctx *fiber.Ctx) error {
 	// try to parse board id
 	boardIdResult := common.ParseBoardId(ctx)
@@ -282,6 +320,18 @@ func (ah *AttachmentHandler) CreateAttachment(ctx *fiber.Ctx) error {
 //
 // If any validation or deletion fails, it returns an appropriate error response.
 // On success, it returns a 204 No Content status.
+//
+// @Summary Delete all attachments for a card
+// @Description Deletes all attachments associated with the specified card in the given board.
+// @Tags attachments
+// @Param boardId path int true "Board ID"
+// @Param cardId path int true "Card ID"
+// @Produce json
+// @Success 204 "No Content"
+// @Failure 400 {object} common.ErrorMsg "Invalid board or card ID"
+// @Failure 404 {object} common.ErrorMsg "Board or card not found"
+// @Failure 500 {object} common.ErrorMsg "Internal server error"
+// @Router /boards/{boardId}/cards/{cardId}/attachments [delete]
 func (ah *AttachmentHandler) DeleteAttachmentsForCard(ctx *fiber.Ctx) error {
 	// try to parse board id
 	boardIdResult := common.ParseBoardId(ctx)
@@ -340,6 +390,18 @@ func (ah *AttachmentHandler) DeleteAttachmentsForCard(ctx *fiber.Ctx) error {
 //  5. Deletes the attachment if all checks pass.
 //
 // Returns appropriate HTTP status codes and error messages for validation, integrity, and internal errors.
+//
+// @Summary Delete an attachment from a kanban card
+// @Description Deletes a specific attachment from a card in a kanban board after validating all relationships and existence.
+// @Tags attachments
+// @Param boardId path int true "Board ID"
+// @Param cardId path int true "Card ID"
+// @Param attachmentId path int true "Attachment ID"
+// @Success 204 "No Content"
+// @Failure 400 {object} common.ErrorMsg "Bad Request"
+// @Failure 404 {object} common.ErrorMsg "Not Found"
+// @Failure 500 {object} common.ErrorMsg "Internal Server Error"
+// @Router /boards/{boardId}/cards/{cardId}/attachments/{attachmentId} [delete]
 func (ah *AttachmentHandler) DeleteAttachment(ctx *fiber.Ctx) error {
 	// try to parse board id
 	boardIdResult := common.ParseBoardId(ctx)

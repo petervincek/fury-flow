@@ -1,4 +1,35 @@
 definitions:
+  attachment.Attachment:
+    properties:
+      attachmentData:
+        items:
+          type: integer
+        type: array
+      attachmentId:
+        type: integer
+      cardId:
+        description: should this be at this level just id or the whole card document
+        type: integer
+      fileSizeBytes:
+        type: integer
+      fileType:
+        minLength: 3
+        type: string
+      filename:
+        minLength: 3
+        type: string
+      uploadedAt:
+        type: string
+      uploadedBy:
+        minLength: 3
+        type: string
+    required:
+    - attachmentData
+    - fileSizeBytes
+    - fileType
+    - filename
+    - uploadedBy
+    type: object
   board.Board:
     properties:
       boardId:
@@ -457,6 +488,197 @@ paths:
       summary: Update a Kanban card by ID
       tags:
       - cards
+  /boards/{boardId}/cards/{cardId}/attachments:
+    delete:
+      description: Deletes all attachments associated with the specified card in the
+        given board.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid board or card ID
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "404":
+          description: Board or card not found
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Delete all attachments for a card
+      tags:
+      - attachments
+    get:
+      description: Retrieves all attachments associated with a specific card in a
+        board.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of attachments
+          schema:
+            items:
+              $ref: '#/definitions/attachment.Attachment'
+            type: array
+        "400":
+          description: Invalid board or card ID
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "404":
+          description: Board or card not found
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Get attachments for a card
+      tags:
+      - attachments
+    post:
+      consumes:
+      - application/json
+      description: Creates a new attachment for the specified card within a board.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      - description: Attachment object
+        in: body
+        name: attachment
+        required: true
+        schema:
+          $ref: '#/definitions/attachment.Attachment'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created attachment
+          schema:
+            $ref: '#/definitions/attachment.Attachment'
+        "400":
+          description: Invalid input or entity not found
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Create a new attachment for a card
+      tags:
+      - attachments
+  /boards/{boardId}/cards/{cardId}/attachments/{attachmentId}:
+    delete:
+      description: Deletes a specific attachment from a card in a kanban board after
+        validating all relationships and existence.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      - description: Attachment ID
+        in: path
+        name: attachmentId
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Delete an attachment from a kanban card
+      tags:
+      - attachments
+    get:
+      description: Retrieves a specific attachment for a kanban card by its ID, ensuring
+        board and card integrity.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      - description: Attachment ID
+        in: path
+        name: attachmentId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Attachment found
+          schema:
+            $ref: '#/definitions/attachment.Attachment'
+        "400":
+          description: Invalid request or integrity error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "404":
+          description: Attachment not found
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Get Kanban Card Attachment by ID
+      tags:
+      - attachments
   /boards/{boardId}/cards/{cardId}/comments:
     delete:
       description: Deletes all comments associated with the specified card in the

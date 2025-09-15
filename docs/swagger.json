@@ -482,6 +482,284 @@
                 }
             }
         },
+        "/boards/{boardId}/cards/{cardId}/attachments": {
+            "get": {
+                "description": "Retrieves all attachments associated with a specific card in a board.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attachments"
+                ],
+                "summary": "Get attachments for a card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of attachments",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/attachment.Attachment"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid board or card ID",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board or card not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new attachment for the specified card within a board.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attachments"
+                ],
+                "summary": "Create a new attachment for a card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Attachment object",
+                        "name": "attachment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/attachment.Attachment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created attachment",
+                        "schema": {
+                            "$ref": "#/definitions/attachment.Attachment"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input or entity not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes all attachments associated with the specified card in the given board.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attachments"
+                ],
+                "summary": "Delete all attachments for a card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid board or card ID",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Board or card not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
+        "/boards/{boardId}/cards/{cardId}/attachments/{attachmentId}": {
+            "get": {
+                "description": "Retrieves a specific attachment for a kanban card by its ID, ensuring board and card integrity.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attachments"
+                ],
+                "summary": "Get Kanban Card Attachment by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Attachment ID",
+                        "name": "attachmentId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Attachment found",
+                        "schema": {
+                            "$ref": "#/definitions/attachment.Attachment"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or integrity error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Attachment not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a specific attachment from a card in a kanban board after validating all relationships and existence.",
+                "tags": [
+                    "attachments"
+                ],
+                "summary": "Delete an attachment from a kanban card",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "cardId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Attachment ID",
+                        "name": "attachmentId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorMsg"
+                        }
+                    }
+                }
+            }
+        },
         "/boards/{boardId}/cards/{cardId}/comments": {
             "get": {
                 "description": "Retrieves all comments for a given card on a specified board.",
@@ -1056,6 +1334,49 @@
         }
     },
     "definitions": {
+        "attachment.Attachment": {
+            "type": "object",
+            "required": [
+                "attachmentData",
+                "fileSizeBytes",
+                "fileType",
+                "filename",
+                "uploadedBy"
+            ],
+            "properties": {
+                "attachmentData": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "attachmentId": {
+                    "type": "integer"
+                },
+                "cardId": {
+                    "description": "should this be at this level just id or the whole card document",
+                    "type": "integer"
+                },
+                "fileSizeBytes": {
+                    "type": "integer"
+                },
+                "fileType": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "filename": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "uploadedAt": {
+                    "type": "string"
+                },
+                "uploadedBy": {
+                    "type": "string",
+                    "minLength": 3
+                }
+            }
+        },
         "board.Board": {
             "type": "object",
             "required": [
