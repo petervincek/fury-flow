@@ -20,6 +20,22 @@ import (
 //   - 400 Bad Request: if parameters are invalid
 //   - 404 Not Found: if board or card does not exist
 //   - 500 Internal Server Error: on unexpected errors
+//
+// GetCardDependencies handles the HTTP request to retrieve dependencies of a specific kanban card.
+// It parses the boardId and cardId from the request context, checks their existence,
+// and returns the list of card dependencies in JSON format.
+//
+// @Summary      Get card dependencies
+// @Description  Retrieves the dependencies of a specific kanban card within a board.
+// @Tags         cards
+// @Produce      json
+// @Param        boardId  path      int  true  "Board ID"
+// @Param        cardId   path      int  true  "Card ID"
+// @Success      200      {array}   card.Card                 "List of card dependencies"
+// @Failure      400      {object}  common.ErrorMsg           "Invalid board or card ID"
+// @Failure      404      {object}  common.ErrorMsg           "Board or card not found"
+// @Failure      500      {object}  common.ErrorMsg           "Internal server error"
+// @Router       /boards/{boardId}/cards/{cardId}/dependencies [get]
 func (ch *CardHandler) GetCardDependencies(ctx *fiber.Ctx) error {
 	// parse and handle boardId
 	result := common.ParseBoardId(ctx)
@@ -62,10 +78,24 @@ func (ch *CardHandler) GetCardDependencies(ctx *fiber.Ctx) error {
 }
 
 // CreateCardDependencies handles the creation of dependencies for a kanban card.
-// It parses the board ID and card ID from the request context, validates their existence,
-// parses the list of dependency card IDs from the request body, and creates the dependencies.
-// Returns appropriate HTTP error responses if parsing or validation fails, or if dependency creation encounters an error.
-// On success, returns HTTP 201 Created with an empty JSON object.
+//
+// It parses the boardId and cardId from the request context, validates their existence,
+// and expects a JSON array of dependency card IDs in the request body. At least one dependency
+// card ID must be provided. If all validations pass, it creates the card dependencies.
+//
+// @Summary      Create card dependencies
+// @Description  Creates dependencies for a kanban card by specifying dependent card IDs.
+// @Tags         cards
+// @Accept       json
+// @Produce      json
+// @Param        boardId  path      int     true  "Board ID"
+// @Param        cardId   path      int     true  "Card ID"
+// @Param        body     body      []int32 true  "Array of dependency card IDs"
+// @Success      201      "No Content"
+// @Failure      400      {object}  common.ErrorMsg "Invalid input or missing dependency card IDs"
+// @Failure      404      {object}  common.ErrorMsg "Board or card not found"
+// @Failure      500      {object}  common.ErrorMsg "Internal server error"
+// @Router       /boards/{boardId}/cards/{cardId}/dependencies [post]
 func (ch *CardHandler) CreateCardDependencies(ctx *fiber.Ctx) error {
 	// parse and handle boardId
 	result := common.ParseBoardId(ctx)
@@ -114,13 +144,24 @@ func (ch *CardHandler) CreateCardDependencies(ctx *fiber.Ctx) error {
 			zap.Int(BOARD_ID_PARAM, boardId), zap.Int(CARD_ID_PARAM, cardId))
 		return ctx.Status(fiber.StatusInternalServerError).JSON(common.NewErrorMsg(INTERNAL_SERVER_ERROR, nil))
 	}
-	return ctx.Status(fiber.StatusCreated).JSON(struct{}{})
+	return ctx.Status(fiber.StatusCreated).JSON(nil)
 }
 
 // DeleteCardDependencies handles the HTTP request to delete all dependencies of a specific card within a kanban board.
 // It parses and validates the board and card IDs from the request context, checks for their existence,
 // and then deletes all dependencies associated with the specified card.
 // Returns a 204 No Content status on success, or an appropriate error response if validation or deletion fails.
+//
+// @Summary Delete all dependencies of a kanban card
+// @Description Deletes all dependencies for the specified card in the given board.
+// @Tags cards
+// @Param boardId path int true "Board ID"
+// @Param cardId path int true "Card ID"
+// @Success 204 "No Content"
+// @Failure 400 {object} common.ErrorMsg "Invalid board or card ID"
+// @Failure 404 {object} common.ErrorMsg "Board or card not found"
+// @Failure 500 {object} common.ErrorMsg "Internal server error"
+// @Router /boards/{boardId}/cards/{cardId}/dependencies [delete]
 func (ch *CardHandler) DeleteCardDependencies(ctx *fiber.Ctx) error {
 	// parse and handle boardId
 	result := common.ParseBoardId(ctx)
@@ -167,6 +208,23 @@ func (ch *CardHandler) DeleteCardDependencies(ctx *fiber.Ctx) error {
 // The handler checks for the existence of the specified board, card, and card dependency.
 // If all validations pass, it deletes the card dependency and returns a 204 No Content status.
 // In case of errors (parsing, validation, or deletion), it responds with the appropriate HTTP status and error message.
+// DeleteCardDependency handles the deletion of a card dependency from a kanban card.
+//
+// It parses and validates the board ID, card ID, and card dependency ID from the request context,
+// checks the existence of the board, card, and card dependency, and then deletes the specified card dependency.
+// Returns appropriate HTTP status codes and error messages for invalid input or internal errors.
+//
+// @Summary Delete a card dependency
+// @Description Deletes a dependency from a kanban card by its ID.
+// @Tags cards
+// @Param boardId path int true "Board ID"
+// @Param cardId path int true "Card ID"
+// @Param cardDependencyId path int true "Card Dependency ID"
+// @Success 204 "No Content"
+// @Failure 400 {object} common.ErrorMsg "Invalid input"
+// @Failure 404 {object} common.ErrorMsg "Not found"
+// @Failure 500 {object} common.ErrorMsg "Internal server error"
+// @Router /boards/{boardId}/cards/{cardId}/dependencies/{cardDependencyId} [delete]
 func (ch *CardHandler) DeleteCardDependency(ctx *fiber.Ctx) error {
 	// parse and handle boardId
 	result := common.ParseBoardId(ctx)

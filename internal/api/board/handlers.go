@@ -63,6 +63,17 @@ func (bh *BoardHandler) GetBoards(c *fiber.Ctx) error {
 // It parses the boardId parameter from the request, validates it, and fetches the corresponding board.
 // Returns a JSON response with the board data if found, or an appropriate error message and status code
 // if the boardId is invalid, the board is not found, or an internal error occurs.
+//
+// @Summary		Get Kanban Board by ID
+// @Description	Retrieves a Kanban board by its unique identifier.
+// @Tags		boards
+// @Param		boardId	path	int	true	"Board ID"
+// @Produce     json
+// @Success		200		{object}	board.Board     	"Board found"
+// @Failure		400		{object}	common.ErrorMsg		"Invalid board ID"
+// @Failure		404		{object}	common.ErrorMsg		"Board not found"
+// @Failure		500		{object}	common.ErrorMsg		"Internal server error"
+// @Router		/boards/{boardId} [get]
 func (bh *BoardHandler) GetBoardById(c *fiber.Ctx) error {
 	boardId, err := c.ParamsInt(BOARD_ID_PARAM)
 	if err != nil {
@@ -82,8 +93,19 @@ func (bh *BoardHandler) GetBoardById(c *fiber.Ctx) error {
 }
 
 // CreateBoard handles the creation of a new Kanban board.
-// It parses and validates the incoming request body, then creates the board in the system.
-// Returns a JSON response with the created board on success, or an error message on failure.
+// It parses and validates the input, then creates the board in the system.
+// Returns the created board on success, or an error message on failure.
+//
+// @Summary      Create Kanban Board
+// @Description  Creates a new Kanban board with the provided details.
+// @Tags         boards
+// @Accept       json
+// @Produce      json
+// @Param        board  body      board.Board  true      "Board entity"
+// @Success      201    {object}  board.Board      "Created board entity"
+// @Failure      400    {object}  common.ErrorMsg  "Invalid input or validation error"
+// @Failure      500    {object}  common.ErrorMsg  "Internal server error"
+// @Router       /boards [post]
 //
 // Possible responses:
 //   - 201 Created: Board successfully created.
@@ -132,6 +154,19 @@ func (bh *BoardHandler) CreateBoard(c *fiber.Ctx) error {
 // If the board is not found or not updated, it returns a 404 Not Found error.
 // For other errors, it returns a 500 Internal Server Error.
 // On success, it returns the updated board information with a 200 OK status.
+//
+// @Summary Update Kanban Board by ID
+// @Description Updates the details of a Kanban board specified by its ID.
+// @Tags boards
+// @Accept json
+// @Produce json
+// @Param boardId path int true "Board ID"
+// @Param board body board.Board true "Board entity to update"
+// @Success 200 "No Content"
+// @Failure 400 {object} common.ErrorMsg "Invalid input or validation error"
+// @Failure 404 {object} common.ErrorMsg "Board not found or not updated"
+// @Failure 500 {object} common.ErrorMsg "Internal server error"
+// @Router /boards/{boardId} [put]
 func (bh *BoardHandler) UpdateBoardById(c *fiber.Ctx) error {
 	boardId, err := c.ParamsInt(BOARD_ID_PARAM)
 	if err != nil {
@@ -171,7 +206,7 @@ func (bh *BoardHandler) UpdateBoardById(c *fiber.Ctx) error {
 		logger.Error(fmt.Sprintf("Error while updating board, err: %v", err), zap.String("type", fmt.Sprintf("%T", err)))
 		return c.Status(fiber.StatusInternalServerError).JSON(common.NewErrorMsg(INTERNAL_SERVER_ERROR, nil))
 	}
-	return c.Status(fiber.StatusOK).JSON(struct{}{})
+	return c.Status(fiber.StatusOK).JSON(nil)
 }
 
 // DeleteBoardById handles the HTTP request to delete a board by its ID.
@@ -179,6 +214,17 @@ func (bh *BoardHandler) UpdateBoardById(c *fiber.Ctx) error {
 // using the Kanban service, and returns appropriate HTTP status codes based on the outcome.
 // Returns 400 Bad Request if the board ID cannot be parsed, 500 Internal Server Error if deletion fails,
 // and 204 No Content on successful deletion.
+// DeleteBoardById deletes a Kanban board by its ID.
+//
+// @Summary Delete a Kanban board by ID
+// @Description Deletes the Kanban board specified by the board ID parameter.
+// @Tags boards
+// @Param boardId path int true "Board ID"
+// @Produce json
+// @Success 204 "No Content"
+// @Failure 400 {object} common.ErrorMsg "Unable to parse board ID"
+// @Failure 500 {object} common.ErrorMsg "Internal server error"
+// @Router /boards/{boardId} [delete]
 func (bh *BoardHandler) DeleteBoardById(c *fiber.Ctx) error {
 	boardId, err := c.ParamsInt(BOARD_ID_PARAM)
 	if err != nil {

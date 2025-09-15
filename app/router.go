@@ -59,8 +59,8 @@ func setupRoutes(ff *FuryFlow) {
 
 	// define the routes for healtcheck and ready(dependency readiness) endpoints
 	hch := healthcheck.New(ff.pool)
-	ff.app.Get("/health", hch.HealthCheck)
-	ff.app.Get("/ready", hch.Ready)
+	ff.app.Get("/health", hch.HealthCheck) // health check endpoint
+	ff.app.Get("/ready", hch.Ready)        // readiness endpoint
 
 	// define the route for Swagger UI
 	ff.app.Get("/swagger/*", swagger.HandlerDefault)
@@ -72,21 +72,21 @@ func setupRoutes(ff *FuryFlow) {
 	kbs := service.NewKanbanBoardService(db.New(ff.pool))
 	bh := board.New(kbs)
 	boardsGroup := ff.app.Group("/boards")
-	boardsGroup.Get("/", bh.GetBoards)
-	boardsGroup.Get(boardIdParamRouteContext, bh.GetBoardById)
-	boardsGroup.Post("/", bh.CreateBoard)
-	boardsGroup.Put(boardIdParamRouteContext, bh.UpdateBoardById)
-	boardsGroup.Delete(boardIdParamRouteContext, bh.DeleteBoardById)
+	boardsGroup.Get("/", bh.GetBoards)                               // retrieve all the kanban boards
+	boardsGroup.Get(boardIdParamRouteContext, bh.GetBoardById)       // retrieve specific kanban board by id
+	boardsGroup.Post("/", bh.CreateBoard)                            // create new kanban board
+	boardsGroup.Put(boardIdParamRouteContext, bh.UpdateBoardById)    // update existing kanban board
+	boardsGroup.Delete(boardIdParamRouteContext, bh.DeleteBoardById) // delete kanban board by id
 
 	// define routes to manage the Kanban Cards (individual tasks and unit of work in Kanban board)
 	kcs := service.NewKanbanCardService(db.New(ff.pool))
 	ch := card.New(kbs, kcs)
 	cardsGroup := boardsGroup.Group(fmt.Sprintf("%s/cards", boardIdParamRouteContext))
-	cardsGroup.Get("/", ch.GetCardsForBoard)
-	cardsGroup.Get(cardIdParamRouteContext, ch.GetCardById)
-	cardsGroup.Post("/", ch.CreateCard)
-	cardsGroup.Put(cardIdParamRouteContext, ch.UpdateCardById)
-	cardsGroup.Delete(cardIdParamRouteContext, ch.DeleteCardById)
+	cardsGroup.Get("/", ch.GetCardsForBoard)                      //retrieve all the card for specific board
+	cardsGroup.Get(cardIdParamRouteContext, ch.GetCardById)       // retrieve spefic card that belong to board
+	cardsGroup.Post("/", ch.CreateCard)                           // create new kanban card
+	cardsGroup.Put(cardIdParamRouteContext, ch.UpdateCardById)    // update existing kanban card
+	cardsGroup.Delete(cardIdParamRouteContext, ch.DeleteCardById) // delete kanban card by id
 
 	// define additional routes to manage dependencies between individual card in the board
 	cardDependenciesGroup := cardsGroup.Group(fmt.Sprintf("%s/dependencies", cardIdParamRouteContext))

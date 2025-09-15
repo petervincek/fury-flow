@@ -21,6 +21,90 @@ definitions:
     - boardName
     - description
     type: object
+  card.Card:
+    properties:
+      acceptanceCriteria:
+        minLength: 3
+        type: string
+      assignee:
+        type: string
+      blockedReason:
+        type: string
+      boardId:
+        description: should this be at this level just id or the whole board document
+        type: integer
+      cardId:
+        type: integer
+      createdAt:
+        type: string
+      createdBy:
+        type: string
+      description:
+        minLength: 3
+        type: string
+      isBlocked:
+        type: boolean
+      priority:
+        $ref: '#/definitions/card.Priority'
+      status:
+        allOf:
+        - $ref: '#/definitions/card.Status'
+        minLength: 3
+      storyPoints:
+        type: integer
+      timeSpentHours:
+        type: number
+      title:
+        minLength: 3
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/card.Type'
+        minLength: 3
+      updatedAt:
+        type: string
+      updatedBy:
+        type: string
+    required:
+    - acceptanceCriteria
+    - description
+    - status
+    - storyPoints
+    - title
+    - type
+    type: object
+  card.Priority:
+    enum:
+    - High
+    - Medium
+    - Low
+    type: string
+    x-enum-varnames:
+    - PriorityHigh
+    - PriorityMedium
+    - PriorityLow
+  card.Status:
+    enum:
+    - To Do
+    - In Progress
+    - In Review
+    - Done
+    type: string
+    x-enum-varnames:
+    - StatusTodo
+    - StatusInProgress
+    - StatusInReview
+    - StatusDone
+  card.Type:
+    enum:
+    - Bug
+    - Feature
+    - Maintenance
+    type: string
+    x-enum-varnames:
+    - TypeBug
+    - TypeFeature
+    - TypeMaintenance
   common.ErrorMsg:
     properties:
       errors:
@@ -54,4 +138,504 @@ paths:
       summary: Get all Kanban boards
       tags:
       - boards
+    post:
+      consumes:
+      - application/json
+      description: Creates a new Kanban board with the provided details.
+      parameters:
+      - description: Board entity
+        in: body
+        name: board
+        required: true
+        schema:
+          $ref: '#/definitions/board.Board'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created board entity
+          schema:
+            $ref: '#/definitions/board.Board'
+        "400":
+          description: Invalid input or validation error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Create Kanban Board
+      tags:
+      - boards
+  /boards/{boardId}:
+    delete:
+      description: Deletes the Kanban board specified by the board ID parameter.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Unable to parse board ID
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Delete a Kanban board by ID
+      tags:
+      - boards
+    get:
+      description: Retrieves a Kanban board by its unique identifier.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Board found
+          schema:
+            $ref: '#/definitions/board.Board'
+        "400":
+          description: Invalid board ID
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "404":
+          description: Board not found
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Get Kanban Board by ID
+      tags:
+      - boards
+    put:
+      consumes:
+      - application/json
+      description: Updates the details of a Kanban board specified by its ID.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Board entity to update
+        in: body
+        name: board
+        required: true
+        schema:
+          $ref: '#/definitions/board.Board'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: No Content
+        "400":
+          description: Invalid input or validation error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "404":
+          description: Board not found or not updated
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Update Kanban Board by ID
+      tags:
+      - boards
+  /boards/{boardId}/cards:
+    get:
+      description: Retrieves all kanban cards associated with the specified board
+        ID.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of Kanban Cards
+          schema:
+            items:
+              $ref: '#/definitions/card.Card'
+            type: array
+        "400":
+          description: Invalid Board ID
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "404":
+          description: Board Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Get Kanban Cards for Board
+      tags:
+      - cards
+    post:
+      consumes:
+      - application/json
+      description: Creates a new Kanban card under the specified board. The board
+        must exist.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Card object
+        in: body
+        name: card
+        required: true
+        schema:
+          $ref: '#/definitions/card.Card'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created card
+          schema:
+            $ref: '#/definitions/card.Card'
+        "400":
+          description: Invalid input or board not found
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Create a new Kanban card
+      tags:
+      - cards
+  /boards/{boardId}/cards/{cardId}:
+    delete:
+      description: Deletes a kanban card from the specified board.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid board or card ID
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "404":
+          description: Board or card not found
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Delete a kanban card by ID
+      tags:
+      - cards
+    get:
+      description: Retrieves a kanban card by its ID, validating that it belongs to
+        the specified board.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Kanban card found
+          schema:
+            $ref: '#/definitions/card.Card'
+        "400":
+          description: Card does not belong to board
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "404":
+          description: Kanban card not found
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Get Kanban Card by ID
+      tags:
+      - cards
+    put:
+      consumes:
+      - application/json
+      description: Update the details of a Kanban card specified by boardId and cardId.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      - description: Card object to update
+        in: body
+        name: card
+        required: true
+        schema:
+          $ref: '#/definitions/card.Card'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: No Content
+        "400":
+          description: Invalid request or card not part of board
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "404":
+          description: Card not found
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Update a Kanban card by ID
+      tags:
+      - cards
+  /boards/{boardId}/cards/{cardId}/dependencies:
+    delete:
+      description: Deletes all dependencies for the specified card in the given board.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid board or card ID
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "404":
+          description: Board or card not found
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Delete all dependencies of a kanban card
+      tags:
+      - cards
+    get:
+      description: Retrieves the dependencies of a specific kanban card within a board.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of card dependencies
+          schema:
+            items:
+              $ref: '#/definitions/card.Card'
+            type: array
+        "400":
+          description: Invalid board or card ID
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "404":
+          description: Board or card not found
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Get card dependencies
+      tags:
+      - cards
+    post:
+      consumes:
+      - application/json
+      description: Creates dependencies for a kanban card by specifying dependent
+        card IDs.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      - description: Array of dependency card IDs
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: No Content
+        "400":
+          description: Invalid input or missing dependency card IDs
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "404":
+          description: Board or card not found
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Create card dependencies
+      tags:
+      - cards
+  /boards/{boardId}/cards/{cardId}/dependencies/{cardDependencyId}:
+    delete:
+      description: Deletes a dependency from a kanban card by its ID.
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardId
+        required: true
+        type: integer
+      - description: Card ID
+        in: path
+        name: cardId
+        required: true
+        type: integer
+      - description: Card Dependency ID
+        in: path
+        name: cardDependencyId
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Delete a card dependency
+      tags:
+      - cards
+  /cards:
+    get:
+      description: Returns a list of all Kanban cards in the system.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of Kanban cards
+          schema:
+            items:
+              $ref: '#/definitions/card.Card'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Get all Kanban cards
+      tags:
+      - cards
+  /health:
+    get:
+      description: Returns 200 OK if the service is healthy.
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Health Check
+      tags:
+      - health
+  /health/ready:
+    get:
+      description: Checks if the application is ready to serve requests by verifying
+        database connectivity.
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "503":
+          description: Service Unavailable
+          schema:
+            type: string
+      summary: Readiness check
+      tags:
+      - health
 swagger: "2.0"

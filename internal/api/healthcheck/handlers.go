@@ -20,7 +20,15 @@ func New(dbPool *pgxpool.Pool) *HealthCheckHandler {
 }
 
 // HealthCheck handles the health check endpoint.
+//
 // It responds with HTTP 200 OK status to indicate that the service is running.
+//
+// @Summary      Health Check
+// @Description  Returns 200 OK if the service is healthy.
+// @Tags         health
+// @Produce      plain
+// @Success      200  {string}  string  "OK"
+// @Router       /health [get]
 func (hch *HealthCheckHandler) HealthCheck(ctx *fiber.Ctx) error {
 	return ctx.SendStatus(fiber.StatusOK)
 }
@@ -29,6 +37,16 @@ func (hch *HealthCheckHandler) HealthCheck(ctx *fiber.Ctx) error {
 // It pings the database connection pool to verify connectivity.
 // If the database is reachable, it responds with HTTP 200 OK.
 // If the database is not reachable, it responds with HTTP 503 Service Unavailable.
+// Ready checks if the application is ready to serve requests by pinging the database.
+// If the database is reachable, it returns HTTP 200 OK; otherwise, it returns HTTP 503 Service Unavailable.
+//
+// @Summary      Readiness check
+// @Description  Checks if the application is ready to serve requests by verifying database connectivity.
+// @Tags         health
+// @Produce      plain
+// @Success      200  {string}  string  "OK"
+// @Failure      503  {string}  string  "Service Unavailable"
+// @Router       /health/ready [get]
 func (hch *HealthCheckHandler) Ready(ctx *fiber.Ctx) error {
 	if err := hch.DbPool.Ping(ctx.Context()); err != nil {
 		return ctx.SendStatus(fiber.StatusServiceUnavailable)
