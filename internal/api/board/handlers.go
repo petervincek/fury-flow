@@ -43,6 +43,14 @@ func New(kbs *service.KanbanBoardService) *BoardHandler {
 // GetBoards handles the HTTP request to retrieve all Kanban boards.
 // It fetches the boards using the Kanban board service and returns them as a JSON response.
 // In case of an error during retrieval, it responds with an internal server error message.
+// GetBoards godoc
+// @Summary      Get all Kanban boards
+// @Description  Retrieves a list of all Kanban boards for the current user/context.
+// @Tags         boards
+// @Produce      json
+// @Success      200  {array}   []board.Board
+// @Failure      500  {object}  common.ErrorMsg
+// @Router       /boards [get]
 func (bh *BoardHandler) GetBoards(c *fiber.Ctx) error {
 	boards, err := bh.kbs.GetKanbanBoards(c.Context())
 	if err != nil {

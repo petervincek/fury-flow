@@ -1,0 +1,57 @@
+definitions:
+  board.Board:
+    properties:
+      boardId:
+        type: integer
+      boardName:
+        minLength: 3
+        type: string
+      createdAt:
+        type: string
+      createdBy:
+        type: string
+      description:
+        minLength: 3
+        type: string
+      updatedAt:
+        type: string
+      updatedBy:
+        type: string
+    required:
+    - boardName
+    - description
+    type: object
+  common.ErrorMsg:
+    properties:
+      errors:
+        items:
+          type: string
+        type: array
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /boards:
+    get:
+      description: Retrieves a list of all Kanban boards for the current user/context.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/board.Board'
+              type: array
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorMsg'
+      summary: Get all Kanban boards
+      tags:
+      - boards
+swagger: "2.0"
