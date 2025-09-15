@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 
+	"github.com/petervincek/fury-flow/internal/api/attachment"
 	"github.com/petervincek/fury-flow/internal/api/board"
 	"github.com/petervincek/fury-flow/internal/api/card"
 	"github.com/petervincek/fury-flow/internal/api/comment"
@@ -16,6 +17,7 @@ const (
 	CARD_ID_PARAM            = "cardId"
 	CARD_DEPENDENCY_ID_PARAM = "cardDependencyId"
 	COMMENT_ID_PARAM         = "commentId"
+	ATTACHMENT_ID_PARAM      = "attachmentId"
 )
 
 var (
@@ -23,6 +25,7 @@ var (
 	cardIdParamRouteContext           = fmt.Sprintf("/:%s", CARD_ID_PARAM)
 	cardIdDependencyParamRouteContext = fmt.Sprintf("/:%s", CARD_DEPENDENCY_ID_PARAM)
 	commentIdParamRouteContext        = fmt.Sprintf("/:%s", COMMENT_ID_PARAM)
+	attachmentIdParamRouteContext     = fmt.Sprintf("/:%s", ATTACHMENT_ID_PARAM)
 )
 
 // setupRoutes configures all HTTP routes for the FuryFlow application.
@@ -33,6 +36,7 @@ var (
 //   - Kanban card management within boards (CRUD operations).
 //   - Managing dependencies between cards (create, retrieve, delete).
 //   - Managing comments for individual cards (create, retrieve, delete).
+//   - Managing attachments for individual cards (create, retrieve, delete).
 //
 // Each route is grouped logically under relevant namespaces (e.g., /boards, /boards/:boardId/cards).
 // Handlers are constructed using services for boards and cards, which interact with the database pool.
@@ -45,6 +49,7 @@ var (
 //   - /boards/:boardId/cards: CRUD operations for cards within a board.
 //   - /boards/:boardId/cards/:cardId/dependencies: Manage dependencies between cards.
 //   - /boards/:boardId/cards/:cardId/comments: Manage comments for cards.
+//   - /boards/:boardId/cards/:cardId/attachments: Manage attachments for cards.
 //
 // Parameters:
 //
@@ -95,4 +100,14 @@ func setupRoutes(ff *FuryFlow) {
 	cardCommentsGroup.Post("/", commentHandler.CreateComment)                          // create comment for individual card
 	cardCommentsGroup.Delete("/", commentHandler.DeleteCommentsForCard)                // delete/remove all comments for a given card
 	cardCommentsGroup.Delete(commentIdParamRouteContext, commentHandler.DeleteComment) // delete/remove specific comment for a given card
+
+	// define additional routes to manage attachments for individual card in the board
+	attachmentService := service.NewKanbanAttachmentService(db.New(ff.pool))
+	attachmentHandler := attachment.New(kbs, kcs, attachmentService, kis)
+	cardAttachmentsGroup := cardsGroup.Group(fmt.Sprintf("%s/attachments", cardIdParamRouteContext))
+	cardAttachmentsGroup.Get("/", attachmentHandler.GetAttachmentsForCard)                         // retrieve all attachments for a given card
+	cardAttachmentsGroup.Get(attachmentIdParamRouteContext, attachmentHandler.GetAttachmentById)   // retrieve attachment by id
+	cardAttachmentsGroup.Post("/", attachmentHandler.CreateAttachment)                             // create attachment for individual card
+	cardAttachmentsGroup.Delete("/", attachmentHandler.DeleteAttachmentsForCard)                   // delete/remove all attachments for a given card
+	cardAttachmentsGroup.Delete(attachmentIdParamRouteContext, attachmentHandler.DeleteAttachment) // delete/remove specific attachment for a given card
 }
