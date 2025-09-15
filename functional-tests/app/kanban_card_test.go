@@ -5,7 +5,6 @@ package app_test
 
 import (
 	"fmt"
-	"log"
 	"testing"
 
 	"github.com/petervincek/fury-flow/functional-tests/utils/testdata"
@@ -34,10 +33,8 @@ func TestCreateKanbanCard(t *testing.T) {
 	assert.NoError(t, err, EXPECTING_NO_ERROR_KANBAN_BOARD_MSG)
 	createdKanbanBoard, err := TestDataCreator.CreateKanbanBoard(kanbanBoard)
 	assert.NoError(t, err, EXPECTING_NO_ERROR_KANBAN_BOARD_TEST_DATA_CREATOR_MSG)
-	log.Printf("CREATED BOARD ID: %d\n", createdKanbanBoard.Entity().BoardId)
-	board, err := TestDataCreator.GetKanbanBoardById(createdKanbanBoard.Entity().BoardId)
+	_, err = TestDataCreator.GetKanbanBoardById(createdKanbanBoard.Entity().BoardId)
 	assert.NoError(t, err, "expecting no error here")
-	log.Printf("Existing board -> id: %d, name: %s\n", board.Entity().BoardId, board.Entity().BoardName)
 
 	// exercise
 	kanbanCard, err := card.NewBuilder().

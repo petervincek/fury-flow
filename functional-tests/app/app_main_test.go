@@ -13,16 +13,17 @@ import (
 	"time"
 
 	"github.com/docker/go-connections/nat"
-	"github.com/gofiber/fiber/v2/log"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/petervincek/fury-flow/app"
 	teststartupmodel "github.com/petervincek/fury-flow/functional-tests/app/test-startup-model"
 	"github.com/petervincek/fury-flow/functional-tests/utils"
 	"github.com/petervincek/fury-flow/functional-tests/utils/testdata"
 	"github.com/petervincek/fury-flow/internal/db"
+	"github.com/petervincek/fury-flow/internal/logging"
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"go.uber.org/zap"
 )
 
 const (
@@ -38,6 +39,7 @@ var (
 	TEST_APP_SERVER_PORT = 0
 	Pool                 *pgxpool.Pool
 	TestDataCreator      testdata.TestData
+	logger               = logging.GetLogger()
 )
 
 // startPostgresqlContainer starts a PostgreSQL Docker container for testing purposes using testcontainers,
@@ -89,7 +91,7 @@ func startPostgresqlContainer() testcontainers.Container {
 	err = cmd.Run()
 	utils.PanicOnError(err)
 
-	log.Info("[Functional Test]: PostgreSQL container started successfully\n")
+	logger.Info("[Functional Test]: PostgreSQL container started successfully")
 	return postgresContainer
 }
 
@@ -104,7 +106,7 @@ func startFuryFlowApp() *app.FuryFlow {
 	go func() {
 		err := app.StartApp()
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal("error while starting FuryFlow app in functioal tests", zap.Error(err))
 		}
 	}()
 	// get the dynamic port of the started application
@@ -114,9 +116,9 @@ func startFuryFlowApp() *app.FuryFlow {
 	// wait until healthy and ready (with retry and some definite timeout)
 	err := utils.WaitUntilHealthyAndReady(context.Background(), func() int { return app.GetAppPort() })
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal("error while waiting for health check in functional tests", zap.Error(err))
 	}
-	log.Infof("[Functional Test]: FuryFlow app instance started successfully on port: %d\n", TEST_APP_SERVER_PORT)
+	logger.Info("[Functional Test]: FuryFlow app instance started successfully on port", zap.Int("port", TEST_APP_SERVER_PORT))
 	return app
 }
 
@@ -146,19 +148,19 @@ func stopLocalInfra(testInfra *teststartupmodel.TestInfra) {
 		containerId := container.GetContainerID()
 		inspect, err := container.Inspect(ctx)
 		if err != nil {
-			log.Errorf("error: %s while inspecting container with ID: %s\n", err, containerId)
+			logger.Error("error while inspecting container with ID", zap.Error(err), zap.String("containerId", containerId))
 		} else {
 			containerName = fmt.Sprintf("'%s:%s'", inspect.Config.Image, inspect.Name)
 		}
 		err = container.Terminate(ctx)
 		if err != nil {
-			log.Errorf("error: %s while terminating container: %s\n", err, utils.GetFirstNonEmpty(containerName, containerId))
+			logger.Error("error while terminating container", zap.Error(err), zap.String("container", utils.GetFirstNonEmpty(containerName, containerId)))
 			terminatingErr = err
 		}
-		log.Infof("[Functional Test]: Container: %s stopped successfully\n", utils.GetFirstNonEmpty(containerName, containerId))
+		logger.Info("[Functional Test]: Container stopped successfully", zap.String("container", utils.GetFirstNonEmpty(containerName, containerId)))
 	}
 	if terminatingErr != nil {
-		log.Errorf("unable to stop local testing infrastructure: %s\n", terminatingErr)
+		logger.Error("unable to stop local testing infrastructure", zap.Error(terminatingErr))
 		os.Exit(1)
 	}
 }
@@ -179,13 +181,13 @@ func TestMain(m *testing.M) {
 // database is in a clean state for each test case and logs the cleanup actions.
 func setupTest(t *testing.T) {
 	// Before Hook - Setup Code
-	log.Debugf("Running db cleanup before test\n")
+	logger.Debug("Running db cleanup before test")
 	err := db.New(Pool).DeleteAll(t.Context())
 	assert.NoError(t, err)
 
 	// After Hook - Clean up
 	t.Cleanup(func() {
 		// Clean up code
-		log.Debugf("Running db cleanup after test\n")
+		logger.Debug("Running db cleanup after test")
 	})
 }
